@@ -11,59 +11,133 @@ const Icons = {
     trendDown: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>'
 };
 
-// --- CENTRAL DATA STORE ---
+// --- CENTRAL DATA STORE (3x Expanded) ---
 const AppData = {
     customers: [
-        { id: 1, name: 'Acıbadem Maslak', city: 'İstanbul', type: 'Hastane', contact: 'Dr. Ahmet Yılmaz', phone: '+90 532 111 22 33' },
-        { id: 2, name: 'Memorial Şişli', city: 'İstanbul', type: 'Hastane', contact: 'Ayşe Demir', phone: '+90 533 444 55 66' },
-        { id: 3, name: 'Ankara Şehir Hastanesi', city: 'Ankara', type: 'Kamu', contact: 'Mehmet Öz', phone: '+90 505 777 88 99' },
-        { id: 4, name: 'Ege Üniversitesi Tıp', city: 'İzmir', type: 'Üniversite', contact: 'Prof. Canan Dağ', phone: '+90 544 123 45 67' }
+        { id: 1, name: 'Acıbadem Maslak', city: 'İstanbul', type: 'Hastane', contact: 'Dr. Ahmet Yılmaz', phone: '+90 532 111 22 33', status: 'Aktif' },
+        { id: 2, name: 'Memorial Şişli', city: 'İstanbul', type: 'Hastane', contact: 'Ayşe Demir', phone: '+90 533 444 55 66', status: 'Aktif' },
+        { id: 3, name: 'Ankara Şehir Hastanesi', city: 'Ankara', type: 'Kamu', contact: 'Mehmet Öz', phone: '+90 505 777 88 99', status: 'Aktif' },
+        { id: 4, name: 'Ege Üniversitesi Tıp', city: 'İzmir', type: 'Üniversite', contact: 'Prof. Canan Dağ', phone: '+90 544 123 45 67', status: 'Aktif' },
+        { id: 5, name: 'Kayseri Şehir Hastanesi', city: 'Kayseri', type: 'Kamu', contact: 'Dr. Hasan Çelik', phone: '+90 535 222 33 44', status: 'Aktif' },
+        { id: 6, name: 'Konya Şehir Hastanesi', city: 'Konya', type: 'Kamu', contact: 'Dr. Fatma Arslan', phone: '+90 536 333 44 55', status: 'Görüşülüyor' },
+        { id: 7, name: 'Eskişehir Osmangazi Üniversitesi', city: 'Eskişehir', type: 'Üniversite', contact: 'Prof. Ali Kara', phone: '+90 537 444 55 66', status: 'Görüşülüyor' },
+        { id: 8, name: 'Erciyes Üniversitesi Tıp', city: 'Kayseri', type: 'Üniversite', contact: 'Doç. Dr. Elif Yıldız', phone: '+90 538 555 66 77', status: 'Teklif Gönderildi' },
+        { id: 9, name: 'Sivas Cumhuriyet Üniversitesi', city: 'Sivas', type: 'Üniversite', contact: 'Dr. Murat Demir', phone: '+90 539 666 77 88', status: 'Görüşülüyor' },
+        { id: 10, name: 'Ankara Bilkent Şehir', city: 'Ankara', type: 'Kamu', contact: 'Uzm. Zeynep Koç', phone: '+90 541 777 88 99', status: 'Aktif' },
+        { id: 11, name: 'Aksaray Devlet Hastanesi', city: 'Aksaray', type: 'Kamu', contact: 'Dr. Serkan Aydın', phone: '+90 542 888 99 00', status: 'Teklif Gönderildi' },
+        { id: 12, name: 'Yozgat Şehir Hastanesi', city: 'Yozgat', type: 'Kamu', contact: 'Dr. Cengiz Polat', phone: '+90 543 999 00 11', status: 'Görüşülüyor' },
     ],
     products: [
-        { id: 1, name: 'Neuro One - Professional', price: 450000, stock: 12 },
-        { id: 2, name: 'Neuro One - Home Edition', price: 125000, stock: 45 },
-        { id: 3, name: 'Biyosera Monitor 5X', price: 85000, stock: 20 }
+        { id: 1, name: 'Neuro One - Professional', price: 450000, stock: 12, category: 'Nöroloji' },
+        { id: 2, name: 'Neuro One - Home Edition', price: 125000, stock: 45, category: 'Nöroloji' },
+        { id: 3, name: 'Biyosera Monitor 5X (BSM-2500)', price: 85000, stock: 20, category: 'Monitör' },
+        { id: 4, name: 'Respomed eNO 100', price: 195000, stock: 8, category: 'Solunum' },
+        { id: 5, name: 'EEG-1200JK (Nihon Kohden)', price: 320000, stock: 6, category: 'Nöroloji' },
+        { id: 6, name: 'aEEG Elmiko CFM', price: 275000, stock: 4, category: 'Nöroloji' },
+        { id: 7, name: 'BSM-3000 Bedside Monitor', price: 115000, stock: 15, category: 'Monitör' },
+        { id: 8, name: 'TEC-5600 Defibrillator', price: 165000, stock: 10, category: 'Acil' },
+        { id: 9, name: 'ECG-3150 Elektrokardiyograf', price: 78000, stock: 18, category: 'Kardiyoloji' },
+        { id: 10, name: 'ECG-3250 Elektrokardiyograf', price: 92000, stock: 14, category: 'Kardiyoloji' },
+        { id: 11, name: 'ECG-3350 Elektrokardiyograf', price: 105000, stock: 9, category: 'Kardiyoloji' },
+        { id: 12, name: 'Electro-Cap ECI Sistemi', price: 42000, stock: 22, category: 'Nöroloji' },
     ],
     sales: [
         { id: 101, customerId: 1, productId: 1, date: '2025-11-15', amount: 450000, status: 'Teslim Edildi' },
-        { id: 102, customerId: 3, productId: 3, date: '2025-12-01', amount: 850000, status: 'Kurulum Aşamasında' }
+        { id: 102, customerId: 3, productId: 3, date: '2025-12-01', amount: 850000, status: 'Kurulum Aşamasında' },
+        { id: 103, customerId: 5, productId: 4, date: '2026-01-10', amount: 390000, status: 'Teslim Edildi' },
+        { id: 104, customerId: 10, productId: 5, date: '2026-01-22', amount: 640000, status: 'Fatura Kesildi' },
+        { id: 105, customerId: 4, productId: 8, date: '2026-02-05', amount: 330000, status: 'Kurulum Aşamasında' },
+        { id: 106, customerId: 8, productId: 1, date: '2026-02-18', amount: 900000, status: 'Teklif Gönderildi' },
+        { id: 107, customerId: 6, productId: 9, date: '2026-03-01', amount: 156000, status: 'Teslim Edildi' },
+        { id: 108, customerId: 2, productId: 7, date: '2026-03-12', amount: 230000, status: 'Beklemede' },
     ],
     maintenance: [
-        { id: 1, saleId: 101, nextDate: '2026-02-15', type: 'Periyodik Bakım', status: 'Bekliyor', notes: 'Filtre değişimi yapılacak' },
-        { id: 2, saleId: 102, nextDate: '2025-12-28', type: 'Kurulum Kontrol', status: 'Yaklaşıyor', notes: 'Kalibrasyon kontrolü' }
+        { id: 1, saleId: 101, nextDate: '2026-04-15', type: 'Periyodik Bakım', status: 'Bekliyor', notes: 'Filtre değişimi yapılacak' },
+        { id: 2, saleId: 102, nextDate: '2026-04-28', type: 'Kurulum Kontrol', status: 'Yaklaşıyor', notes: 'Kalibrasyon kontrolü' },
+        { id: 3, saleId: 103, nextDate: '2026-05-10', type: 'Garanti Bakım', status: 'Planlandı', notes: 'eNO sensör kontrolü' },
+        { id: 4, saleId: 104, nextDate: '2026-04-05', type: 'Arıza Onarım', status: 'Acil', notes: 'EEG sinyal kaybı rapor edildi' },
+        { id: 5, saleId: 105, nextDate: '2026-05-20', type: 'Periyodik Bakım', status: 'Planlandı', notes: 'Defibrilatör pil kontrolü' },
+        { id: 6, saleId: 107, nextDate: '2026-06-01', type: 'Kalibrasyon', status: 'Bekliyor', notes: 'ECG hassasiyet kalibrasyonu' },
     ],
-    receivables: [ // Alacaklar
-        { id: 1, customerId: 1, amount: 150000, dueDate: '2025-12-30', status: 'Bekliyor', ref: 'FAT-2025-088' },
-        { id: 2, customerId: 3, amount: 850000, dueDate: '2026-01-15', status: 'Bekliyor', ref: 'FAT-2025-092' }
+    receivables: [
+        { id: 1, customerId: 1, amount: 150000, dueDate: '2026-04-30', status: 'Bekliyor', ref: 'FAT-2026-011' },
+        { id: 2, customerId: 3, amount: 850000, dueDate: '2026-05-15', status: 'Bekliyor', ref: 'FAT-2026-014' },
+        { id: 3, customerId: 5, amount: 195000, dueDate: '2026-04-20', status: 'Kısmi Ödendi', ref: 'FAT-2026-018' },
+        { id: 4, customerId: 10, amount: 640000, dueDate: '2026-06-01', status: 'Bekliyor', ref: 'FAT-2026-022' },
+        { id: 5, customerId: 8, amount: 450000, dueDate: '2026-07-10', status: 'Teklif Aşaması', ref: 'PRO-2026-005' },
+        { id: 6, customerId: 4, amount: 165000, dueDate: '2026-05-25', status: 'Bekliyor', ref: 'FAT-2026-027' },
     ],
-    payables: [ // Ödenecekler
-        { id: 1, supplier: 'TechChip Electronics', amount: 45000, dueDate: '2025-12-25', status: 'Kritik', type: 'Hammadde' },
-        { id: 2, supplier: 'MedLojistik A.Ş.', amount: 12000, dueDate: '2026-01-05', status: 'Bekliyor', type: 'Lojistik' }
+    payables: [
+        { id: 1, supplier: 'TechChip Electronics', amount: 45000, dueDate: '2026-04-25', status: 'Kritik', type: 'Hammadde' },
+        { id: 2, supplier: 'MedLojistik A.Ş.', amount: 12000, dueDate: '2026-05-05', status: 'Bekliyor', type: 'Lojistik' },
+        { id: 3, supplier: 'Nihon Kohden Japan', amount: 285000, dueDate: '2026-04-15', status: 'Kritik', type: 'İthalat' },
+        { id: 4, supplier: 'Elmiko Medical (PL)', amount: 92000, dueDate: '2026-06-10', status: 'Bekliyor', type: 'İthalat' },
     ],
     expenses: [
-        { id: 1, category: 'Ar-Ge', amount: 150000, date: '2025-12-10', desc: 'Neuro One V2 Prototip' },
-        { id: 2, category: 'Personel', amount: 250000, date: '2025-12-01', desc: 'Kasım Ayı Maaşları' }
+        { id: 1, category: 'Ar-Ge', amount: 150000, date: '2026-03-10', desc: 'Neuro One V3 Prototip Geliştirme' },
+        { id: 2, category: 'Personel', amount: 320000, date: '2026-03-01', desc: 'Mart Ayı Maaşları' },
+        { id: 3, category: 'Kira', amount: 45000, date: '2026-03-01', desc: 'Ofis & Depo Kira' },
+        { id: 4, category: 'Pazarlama', amount: 75000, date: '2026-03-15', desc: 'Medica 2026 Fuar Hazırlığı' },
+        { id: 5, category: 'Lojistik', amount: 28000, date: '2026-03-20', desc: 'Kayseri & Konya Ürün Sevkiyatı' },
+        { id: 6, category: 'Hukuk', amount: 15000, date: '2026-03-25', desc: 'İhale Danışmanlığı' },
     ],
     employees: [
         { id: 101, name: 'Ahmet Yılmaz', dept: 'Yazılım', pos: 'Kıdemli Yazılımcı', status: 'Aktif', salary: 85000, start: '2023-05-01' },
         { id: 102, name: 'Ayşe Demir', dept: 'Ar-Ge', pos: 'Biyomedikal Müh.', status: 'Aktif', salary: 75000, start: '2023-06-15' },
         { id: 103, name: 'Mehmet Öz', dept: 'Satış', pos: 'Satış Müdürü', status: 'İzinli', salary: 65000, start: '2024-02-10' },
-        { id: 104, name: 'Zeynep Kaya', dept: 'HR', pos: 'HR Uzmanı', status: 'Aktif', salary: 45000, start: '2024-08-20' }
+        { id: 104, name: 'Zeynep Kaya', dept: 'HR', pos: 'HR Uzmanı', status: 'Aktif', salary: 45000, start: '2024-08-20' },
+        { id: 105, name: 'Can Tekin', dept: 'Servis', pos: 'Saha Mühendisi', status: 'Aktif', salary: 55000, start: '2024-01-15' },
+        { id: 106, name: 'Selin Acar', dept: 'Finans', pos: 'Muhasebe Uzmanı', status: 'Aktif', salary: 52000, start: '2024-03-01' },
+        { id: 107, name: 'Burak Şahin', dept: 'Satış', pos: 'Bölge Temsilcisi', status: 'Aktif', salary: 48000, start: '2024-09-10' },
+        { id: 108, name: 'Deniz Yıldırım', dept: 'Ar-Ge', pos: 'Elektronik Müh.', status: 'Aktif', salary: 72000, start: '2023-11-01' },
     ],
     checks: [
-        { id: 1, type: 'Müşteri Çeki', entity: 'Acıbadem Hastanesi', amount: 150000, dueDate: '2026-04-15', status: 'Portföyde', bank: 'Garanti BBVA', ref: 'TR-12345678' },
-        { id: 2, type: 'Firma Çeki', entity: 'Medikal Tedarik A.Ş', amount: 45000, dueDate: '2026-03-20', status: 'Tahsil Edildi', bank: 'İş Bankası', ref: 'TR-98765432' },
-        { id: 3, type: 'Senet', entity: 'Ege Özel Sağlık', amount: 25000, dueDate: '2026-03-10', status: 'Karşılıksız', bank: '-', ref: 'SNT-001' }
+        { id: 1, type: 'Müşteri Çeki', entity: 'Acıbadem Hastanesi', amount: 150000, dueDate: '2026-06-15', status: 'Portföyde', bank: 'Garanti BBVA', ref: 'TR-12345678' },
+        { id: 2, type: 'Firma Çeki', entity: 'Medikal Tedarik A.Ş', amount: 45000, dueDate: '2026-05-20', status: 'Tahsil Edildi', bank: 'İş Bankası', ref: 'TR-98765432' },
+        { id: 3, type: 'Senet', entity: 'Ege Özel Sağlık', amount: 25000, dueDate: '2026-05-10', status: 'Karşılıksız', bank: '-', ref: 'SNT-001' },
+        { id: 4, type: 'Müşteri Çeki', entity: 'Kayseri Şehir Hastanesi', amount: 195000, dueDate: '2026-07-01', status: 'Portföyde', bank: 'Ziraat', ref: 'TR-55667788' },
+        { id: 5, type: 'Müşteri Çeki', entity: 'Ankara Bilkent Şehir', amount: 320000, dueDate: '2026-08-15', status: 'Portföyde', bank: 'Halkbank', ref: 'TR-11223344' },
     ],
     accounts: [
         { id: 1, name: 'Merkez Kasa (Nakit)', type: 'Kasa', balance: 42500, currency: 'TRY' },
-        { id: 2, name: 'Garanti BBVA (Ticari)', type: 'Banka', balance: 345000, currency: 'TRY' },
-        { id: 3, name: 'İş Bankası (Döviz)', type: 'Banka', balance: 12500, currency: 'USD' }
+        { id: 2, name: 'Garanti BBVA (Ticari)', type: 'Banka', balance: 845000, currency: 'TRY' },
+        { id: 3, name: 'İş Bankası (Döviz)', type: 'Banka', balance: 28500, currency: 'USD' },
+    ],
+    travels: [
+        { id: 1, city: 'Kayseri', hospital: 'Kayseri Şehir Hastanesi', date: '2026-04-08', purpose: 'Neuro One Kurulum & Demo', assignee: 'Can Tekin', status: 'Onaylandı' },
+        { id: 2, city: 'Konya', hospital: 'Konya Şehir Hastanesi', date: '2026-04-12', purpose: 'EEG Satış Sunumu', assignee: 'Mehmet Öz', status: 'Planlanıyor' },
+        { id: 3, city: 'Eskişehir', hospital: 'Eskişehir Osmangazi Ünv.', date: '2026-04-18', purpose: 'Teklif Sunumu & İhale Hazırlığı', assignee: 'Burak Şahin', status: 'Onaylandı' },
+        { id: 4, city: 'Sivas', hospital: 'Cumhuriyet Üniversitesi', date: '2026-04-25', purpose: 'Respomed eNO Demo', assignee: 'Can Tekin', status: 'Planlanıyor' },
+        { id: 5, city: 'Ankara', hospital: 'Bilkent Şehir Hastanesi', date: '2026-04-05', purpose: 'Bakım & Kalibrasyon', assignee: 'Can Tekin', status: 'Bugün' },
+        { id: 6, city: 'Yozgat', hospital: 'Yozgat Şehir Hastanesi', date: '2026-05-02', purpose: 'İlk Görüşme & Tanıtım', assignee: 'Burak Şahin', status: 'Planlanıyor' },
+    ],
+    projects: [
+        { id: 1, name: 'Neuro One V3 Geliştirme', status: 'Devam Ediyor', progress: 68, start: '2025-09-01', deadline: '2026-06-30', lead: 'Ayşe Demir', priority: 'Yüksek' },
+        { id: 2, name: 'Respomed eNO Yazılım Güncelleme', status: 'Devam Ediyor', progress: 45, start: '2026-01-15', deadline: '2026-05-15', lead: 'Ahmet Yılmaz', priority: 'Orta' },
+        { id: 3, name: 'Ankara Bölge Genişleme', status: 'Devam Ediyor', progress: 82, start: '2025-11-01', deadline: '2026-04-30', lead: 'Mehmet Öz', priority: 'Yüksek' },
+        { id: 4, name: 'ISO 13485 Yenileme', status: 'Planlanıyor', progress: 15, start: '2026-03-01', deadline: '2026-09-30', lead: 'Zeynep Kaya', priority: 'Kritik' },
+        { id: 5, name: 'Medica 2026 Fuar Hazırlığı', status: 'Devam Ediyor', progress: 30, start: '2026-02-01', deadline: '2026-11-10', lead: 'Burak Şahin', priority: 'Orta' },
+    ],
+    priorities: [
+        { id: 1, task: 'Kayseri Şehir — Neuro One kurulum tamamla', urgency: 'Acil', due: '2026-04-08', assignee: 'Can Tekin' },
+        { id: 2, task: 'Ankara Bilkent — EEG arıza çöz', urgency: 'Acil', due: '2026-04-05', assignee: 'Deniz Yıldırım' },
+        { id: 3, task: 'Nihon Kohden ödeme — ₺285K ithalat', urgency: 'Kritik', due: '2026-04-15', assignee: 'Selin Acar' },
+        { id: 4, task: 'Konya Şehir — satış sunumu hazırla', urgency: 'Yüksek', due: '2026-04-12', assignee: 'Mehmet Öz' },
+        { id: 5, task: 'Erciyes Ünv. — teklif revize et', urgency: 'Normal', due: '2026-04-20', assignee: 'Burak Şahin' },
+        { id: 6, task: 'Respomed yazılım v2.1 test', urgency: 'Yüksek', due: '2026-04-18', assignee: 'Ahmet Yılmaz' },
+        { id: 7, task: 'Fuar standı tasarım onayı', urgency: 'Normal', due: '2026-05-01', assignee: 'Zeynep Kaya' },
+    ],
+    invoices: [
+        { id: 'FAT-2026-011', customerId: 1, amount: 450000, date: '2025-11-20', dueDate: '2026-04-30', status: 'Bekliyor', items: 'Neuro One Pro x1' },
+        { id: 'FAT-2026-014', customerId: 3, amount: 850000, date: '2025-12-05', dueDate: '2026-05-15', status: 'Bekliyor', items: 'BSM-2500 x10' },
+        { id: 'FAT-2026-018', customerId: 5, amount: 390000, date: '2026-01-15', dueDate: '2026-04-20', status: 'Kısmi Ödendi', items: 'Respomed eNO x2' },
+        { id: 'FAT-2026-022', customerId: 10, amount: 640000, date: '2026-01-25', dueDate: '2026-06-01', status: 'Bekliyor', items: 'EEG-1200JK x2' },
+        { id: 'FAT-2026-027', customerId: 4, amount: 165000, date: '2026-02-08', dueDate: '2026-05-25', status: 'Bekliyor', items: 'TEC-5600 x1' },
     ],
     users: [
-        { id: 1, username: 'eren', password: 'eren', role: 'admin', name: 'Eren Yılmaz', status: 'Aktif' },
+        { id: 1, username: 'eren', password: 'eren', role: 'admin', name: 'Eren Çelikten', status: 'Aktif' },
         { id: 2, username: 'satis', password: '123', role: 'sales', name: 'Satış Personeli', status: 'Aktif' },
-        { id: 3, username: 'finans', password: '123', role: 'finance', name: 'Muhasebe Uzmanı', status: 'Aktif' }
+        { id: 3, username: 'finans', password: '123', role: 'finance', name: 'Muhasebe Uzmanı', status: 'Aktif' },
     ]
 };
 
@@ -76,11 +150,15 @@ function initApp() {
 }
 
 function loadData() {
+    const DATA_VERSION = 'v3_cockpit';
     const stored = localStorage.getItem('biyosera_erp_data');
-    if (stored) {
+    const storedVersion = localStorage.getItem('biyosera_erp_version');
+    if (stored && storedVersion === DATA_VERSION) {
         const parsed = JSON.parse(stored);
         Object.assign(AppData, parsed);
     } else {
+        localStorage.removeItem('biyosera_erp_data');
+        localStorage.setItem('biyosera_erp_version', DATA_VERSION);
         saveData();
     }
 }
@@ -302,220 +380,165 @@ function renderDashboard() {
     const totalSales = AppData.sales.reduce((sum, s) => sum + s.amount, 0);
     const totalReceivables = AppData.receivables.reduce((sum, r) => sum + r.amount, 0);
     const totalPayables = AppData.payables.reduce((sum, p) => sum + p.amount, 0);
-    const netCashFlow = totalSales - totalPayables - AppData.expenses.reduce((s, e) => s + e.amount, 0);
+    const totalExpenses = AppData.expenses.reduce((s, e) => s + e.amount, 0);
+    const netCashFlow = totalSales - totalPayables - totalExpenses;
+    const conversionRate = Math.round((AppData.sales.filter(s => s.status === 'Teslim Edildi').length / AppData.sales.length) * 100);
 
-    // Auto-generated system metrics for cockpit feel
-    const sysLoad = Math.floor(Math.random() * 30) + 20;
-    const dbStatus = "Stable";
-    const activeUsers = Math.floor(Math.random() * 5) + 8;
+    function gauge(percent, color, label, value) {
+        const r = 40, cx = 50, cy = 50;
+        const c = 2 * Math.PI * r;
+        const offset = c - (percent / 100) * c * 0.75;
+        return `<div class="gauge-widget">
+            <svg viewBox="0 0 100 100" class="gauge-svg">
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-dasharray="${c * 0.75}" stroke-dashoffset="0" transform="rotate(135 ${cx} ${cy})" stroke-linecap="round"/>
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-dasharray="${c * 0.75}" stroke-dashoffset="${offset}" transform="rotate(135 ${cx} ${cy})" stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease;filter:drop-shadow(0 0 6px ${color})"/>
+                <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="${color}" font-size="11" font-weight="700">${value}</text>
+                <text x="${cx}" y="${cy + 10}" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="5.5">${label}</text>
+            </svg>
+        </div>`;
+    }
+
+    const urgencyColor = { 'Acil': '#FF5263', 'Kritik': '#FF9F43', 'Yüksek': '#479CFF', 'Normal': '#33D69F' };
+    const statusColor = { 'Aktif': '#33D69F', 'Görüşülüyor': '#479CFF', 'Teklif Gönderildi': '#FF9F43' };
+    const travelStatusColor = { 'Bugün': '#FF5263', 'Onaylandı': '#33D69F', 'Planlanıyor': '#479CFF' };
 
     return `
-        <!-- Financial & Business Cockpit Header -->
-        <h2 class="page-title mb-2 fs-3">Finansal Genel Bakış</h2>
-
-        <!-- Metric Heads-Up Display -->
-        <div class="grid grid-4 mb-2">
-            <div class="stat-box-sm">
-                <div>
-                    <div class="label">Net Kârlılık</div>
-                    <div class="value text-success">${formatCurrency(netCashFlow)}</div>
-                </div>
-                <!-- Stylish Mini Trend -->
-                <div class="trend text-success">
-                   <svg width="60" height="30" viewBox="0 0 60 30" fill="none">
-                        <path d="M0 25 L10 20 L20 22 L30 10 L40 15 L50 5 L60 8" stroke="#33D69F" stroke-width="2" fill="none"/>
-                        <path d="M0 25 L10 20 L20 22 L30 10 L40 15 L50 5 L60 8 V30 H0 Z" fill="url(#gradSuccess)" opacity="0.2"/>
-                        <defs><linearGradient id="gradSuccess" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#33D69F"/><stop offset="100%" stop-color="#33D69F" stop-opacity="0"/></linearGradient></defs>
-                   </svg>
-                </div>
-            </div>
-            <div class="stat-box-sm">
-                <div>
-                    <div class="label">Toplam Gelir</div>
-                    <div class="value">${formatCurrency(totalReceivables)}</div>
-                </div>
-                <div class="trend text-primary">
-                    <svg width="60" height="30" viewBox="0 0 60 30" fill="none">
-                        <path d="M0 28 L15 18 L30 20 L45 5 L60 2" stroke="#479CFF" stroke-width="2"/>
-                        <defs><linearGradient id="gradPrimary" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#479CFF"/><stop offset="100%" stop-color="#479CFF" stop-opacity="0"/></linearGradient></defs>
-                   </svg>
-                </div>
-            </div>
-            <div class="stat-box-sm">
-                <div>
-                    <div class="label">Toplam Gider</div>
-                    <div class="value text-danger" style="opacity:0.9">${formatCurrency(totalPayables)}</div>
-                </div>
-               <div class="trend text-danger">
-                    <svg width="60" height="30" viewBox="0 0 60 30" fill="none">
-                        <path d="M0 10 L15 15 L30 5 L45 20 L60 25" stroke="#FF5263" stroke-width="2"/>
-                   </svg>
-               </div>
-            </div>
-             <div class="stat-box-sm">
-                <div>
-                    <div class="label">Sipariş Dönüşümü</div>
-                    <div class="value text-warning">8.4 / 10</div>
-                </div>
-                 <div class="trend text-warning">● Yüksek</div>
-            </div>
-        </div>
-
-        <!-- Main Cockpit Layout -->
-        <div class="grid-cockpit">
-
-            <!-- Left Panel: Critical Actions (Kept Compact) -->
-            <div class="flex-col gap-1">
-                <div class="card p-2">
-                    <button class="btn btn-primary w-100 mb-2 btn-sm" onclick="openModal('sale')">${Icons.plus} Hızlı Satış</button>
-                    <button class="btn btn-secondary w-100 mb-2 btn-sm" onclick="openModal('service-form')">Servis Girişi</button>
-
-                    <div class="mt-2 text-center p-2 rounded" style="background:rgba(255,255,255,0.03); border:1px solid var(--border)">
-                        <div class="label mb-1">Bakım Bekleyen</div>
-                        <div style="font-size:1.5rem; font-weight:700; color:var(--warning)">${AppData.maintenance.filter(m => m.status === 'Yaklaşıyor').length}</div>
-                    </div>
-                </div>
-
-                <div class="card p-2" style="flex:1">
-                    <h3 style="font-size:0.8rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:12px;">Stok Özeti</h3>
-                    <ul style="list-style:none; padding:0; font-size:0.85rem; color:var(--text-main);">
-                        <li class="flex-between mb-2 p-1" style="border-bottom:1px solid var(--border)"><span>Neuro One V3</span> <span class="bold">12</span></li>
-                        <li class="flex-between mb-2 p-1" style="border-bottom:1px solid var(--border)"><span>Monitor 5X</span> <span class="bold">20</span></li>
-                        <li class="flex-between p-1"><span>Kablolar</span> <span class="text-warning bold">5 (Kritik)</span></li>
-                    </ul>
-                </div>
+        <div class="cockpit-grid">
+            <!-- ROW 1: Gauges -->
+            <div class="cockpit-gauges">
+                ${gauge(Math.min(100, (netCashFlow / 2000000) * 100), '#33D69F', 'NET KÂR', formatCurrency(netCashFlow).replace('₺', '₺'))}
+                ${gauge(Math.min(100, (totalReceivables / 3000000) * 100), '#479CFF', 'ALACAK', formatCurrency(totalReceivables).replace('₺', '₺'))}
+                ${gauge(Math.min(100, (totalPayables / 1000000) * 100), '#FF5263', 'BORÇ', formatCurrency(totalPayables).replace('₺', '₺'))}
+                ${gauge(conversionRate, '#FF9F43', 'DÖNÜŞÜM', conversionRate + '%')}
             </div>
 
-            <!-- Center Panel: Stylish Area Chart -->
-            <div class="flex-col gap-1">
-                <div class="card" style="height:100%; min-height:400px; display:flex; flex-direction:column;">
-                    <div class="card-header flex-between" style="border-bottom:none; padding-bottom:0;">
-                        <div>
-                            <h3 style="font-size:1.1rem">Finansal Performans</h3>
-                            <p class="text-muted" style="font-size:0.8rem">Son 6 Aylık Gelir/Gider Analizi</p>
+            <!-- ROW 2: Main Panels -->
+            <div class="cockpit-main">
+                <!-- LEFT: Cash Flow + Hospitals -->
+                <div class="cockpit-left">
+                    <!-- Cash Flow Cards -->
+                    <div class="cashflow-grid">
+                        <div class="cf-card cf-in">
+                            <div class="cf-icon">↓</div>
+                            <div class="cf-data">
+                                <div class="cf-label">Gelen</div>
+                                <div class="cf-value">${formatCurrency(AppData.receivables.filter(r => r.status === 'Kısmi Ödendi').reduce((s,r) => s + r.amount, 0) + AppData.checks.filter(c => c.status === 'Tahsil Edildi').reduce((s,c) => s + c.amount, 0))}</div>
+                            </div>
                         </div>
-                        <div class="flex gap-1">
-                            <span class="badge badge-info" style="font-size:0.7rem">Gelir</span>
-                            <span class="badge badge-danger" style="font-size:0.7rem">Gider</span>
+                        <div class="cf-card cf-out">
+                            <div class="cf-icon">↑</div>
+                            <div class="cf-data">
+                                <div class="cf-label">Giden</div>
+                                <div class="cf-value">${formatCurrency(totalExpenses)}</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- SVG Area Chart -->
-                    <div style="flex:1; padding:20px; position:relative; min-height:220px;">
-                        <svg width="100%" height="100%" viewBox="0 0 500 200" preserveAspectRatio="none">
-                            <defs>
-                                <linearGradient id="chartGradBlue" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#479CFF" stop-opacity="0.4" />
-                                    <stop offset="100%" stop-color="#479CFF" stop-opacity="0" />
-                                </linearGradient>
-                                <linearGradient id="chartGradRed" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="#FF5263" stop-opacity="0.3" />
-                                    <stop offset="100%" stop-color="#FF5263" stop-opacity="0" />
-                                </linearGradient>
-                            </defs>
-
-                            <!-- Grid Lines -->
-                            <line x1="0" y1="150" x2="500" y2="150" stroke="#333" stroke-width="1" stroke-dasharray="4" />
-                            <line x1="0" y1="100" x2="500" y2="100" stroke="#333" stroke-width="1" stroke-dasharray="4" />
-                            <line x1="0" y1="50" x2="500" y2="50" stroke="#333" stroke-width="1" stroke-dasharray="4" />
-
-                            <!-- Income Area (Blue) -->
-                            <path d="M0 160 Q 80 140, 160 100 T 320 60 T 500 40 V 200 H 0 Z" fill="url(#chartGradBlue)" />
-                            <path d="M0 160 Q 80 140, 160 100 T 320 60 T 500 40" fill="none" stroke="#479CFF" stroke-width="3" />
-
-                            <!-- Expense Area (Red) -->
-                            <path d="M0 180 Q 90 170, 180 160 T 360 140 T 500 130 V 200 H 0 Z" fill="url(#chartGradRed)" />
-                            <path d="M0 180 Q 90 170, 180 160 T 360 140 T 500 130" fill="none" stroke="#FF5263" stroke-width="2" stroke-dasharray="5,5" />
-
-                            <!-- Points -->
-                            <circle cx="160" cy="100" r="4" fill="#479CFF" stroke="#141416" stroke-width="2" />
-                            <circle cx="320" cy="60" r="4" fill="#479CFF" stroke="#141416" stroke-width="2" />
-                            <circle cx="500" cy="40" r="4" fill="#479CFF" stroke="#141416" stroke-width="2" />
-                        </svg>
-                        <!-- Month Labels -->
-                        <div class="flex-between text-muted" style="font-size:0.75rem; margin-top:-20px; position:relative; z-index:10; padding:0 10px;">
-                            <span>Oca</span><span>Şub</span><span>Mar</span><span>Nis</span><span>May</span><span>Haz</span>
+                        <div class="cf-card cf-future-in">
+                            <div class="cf-icon">⟳↓</div>
+                            <div class="cf-data">
+                                <div class="cf-label">Gelecek</div>
+                                <div class="cf-value">${formatCurrency(totalReceivables)}</div>
+                            </div>
+                        </div>
+                        <div class="cf-card cf-future-out">
+                            <div class="cf-icon">⟳↑</div>
+                            <div class="cf-data">
+                                <div class="cf-label">Gidecek</div>
+                                <div class="cf-value">${formatCurrency(totalPayables)}</div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Recent Transactions Table -->
-                    <div class="table-container" style="padding:0 20px 20px 20px;">
-                        <h4 class="text-muted mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.1em; border-bottom:1px solid var(--border); padding-bottom:8px;">Son İşlemler</h4>
-                        <table style="border-spacing: 0 8px;">
-                            <tbody>
-                                ${AppData.sales.slice(-2).map(s => `
-                                    <tr style="background:transparent; border-bottom:1px solid var(--border-light)">
-                                        <td style="padding:8px 0; font-size:0.9rem;">
-                                            <div class="flex items-center gap-1">
-                                                <div style="width:8px; height:8px; background:var(--success); border-radius:50%"></div>
-                                                <span class="bold">${getCustomerName(s.customerId)}</span>
-                                            </div>
-                                        </td>
-                                        <td style="padding:8px 0; text-align:right; color:var(--success); font-weight:700;">+${formatCurrency(s.amount)}</td>
-                                    </tr>
-                                `).join('')}
-                                ${AppData.payables.slice(-2).map(p => `
-                                    <tr style="background:transparent;">
-                                        <td style="padding:8px 0; font-size:0.9rem;">
-                                            <div class="flex items-center gap-1">
-                                                <div style="width:8px; height:8px; background:var(--danger); border-radius:50%"></div>
-                                                <span class="bold">${p.supplier}</span>
-                                            </div>
-                                        </td>
-                                        <td style="padding:8px 0; text-align:right; color:var(--danger); font-weight:700;">-${formatCurrency(p.amount)}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
+                    <!-- Hospitals -->
+                    <div class="cockpit-panel">
+                        <div class="panel-header"><span>🏥 Görüşülen Hastaneler</span><span class="badge badge-info">${AppData.customers.length}</span></div>
+                        <div class="hospital-list">
+                            ${AppData.customers.map(c => `
+                                <div class="hospital-item">
+                                    <div class="h-dot" style="background:${statusColor[c.status] || '#666'}"></div>
+                                    <div class="h-info">
+                                        <div class="h-name">${c.name}</div>
+                                        <div class="h-city">${c.city} · ${c.type}</div>
+                                    </div>
+                                    <span class="h-status" style="color:${statusColor[c.status] || '#666'}">${c.status}</span>
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Right Panel: Live Feed / Notifications -->
-            <div class="card p-0" style="overflow:hidden;">
-                <div class="card-header" style="padding:16px; margin:0; border-bottom:1px solid var(--border); background:var(--bg-hover);">
-                    <h3 style="font-size:0.9rem">Canlı Sistem Akışı</h3>
-                    <span class="status-dot ok"></span>
+                <!-- CENTER: Projects + Priorities -->
+                <div class="cockpit-center">
+                    <!-- Projects -->
+                    <div class="cockpit-panel">
+                        <div class="panel-header"><span>📊 Proje Yönetimi</span></div>
+                        <div class="project-list">
+                            ${AppData.projects.map(p => `
+                                <div class="project-item">
+                                    <div class="proj-top">
+                                        <span class="proj-name">${p.name}</span>
+                                        <span class="proj-pct">${p.progress}%</span>
+                                    </div>
+                                    <div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%;background:${p.priority === 'Kritik' ? '#FF5263' : p.priority === 'Yüksek' ? '#479CFF' : '#33D69F'}"></div></div>
+                                    <div class="proj-meta">${p.lead} · ${p.status}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Priorities -->
+                    <div class="cockpit-panel">
+                        <div class="panel-header"><span>🔥 İş Öncelik Sıralaması</span></div>
+                        <div class="priority-list">
+                            ${AppData.priorities.map((p, i) => `
+                                <div class="priority-item">
+                                    <div class="pri-rank">${i + 1}</div>
+                                    <div class="pri-info">
+                                        <div class="pri-task">${p.task}</div>
+                                        <div class="pri-meta">${p.assignee} · ${formatDate(p.due)}</div>
+                                    </div>
+                                    <span class="pri-badge" style="background:${urgencyColor[p.urgency]}20;color:${urgencyColor[p.urgency]}">${p.urgency}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
                 </div>
-                <div style="max-height:500px; overflow-y:auto;">
-                    <div class="feed-item">
-                        <div class="feed-time">12:45</div>
-                        <div class="feed-content">
-                            <div class="bold">Sistem Girişi</div>
-                            <div class="text-muted">Ahmet Yılmaz sisteme giriş yaptı (IP: 192.168.1.45)</div>
+
+                <!-- RIGHT: Travels + Feed -->
+                <div class="cockpit-right">
+                    <!-- Travels -->
+                    <div class="cockpit-panel">
+                        <div class="panel-header"><span>✈️ Seyahat Planı</span></div>
+                        <div class="travel-list">
+                            ${AppData.travels.map(t => `
+                                <div class="travel-item">
+                                    <div class="trv-date">
+                                        <div class="trv-day">${new Date(t.date).getDate()}</div>
+                                        <div class="trv-month">${new Date(t.date).toLocaleString('tr', {month:'short'})}</div>
+                                    </div>
+                                    <div class="trv-info">
+                                        <div class="trv-city">${t.city}</div>
+                                        <div class="trv-hospital">${t.hospital}</div>
+                                        <div class="trv-purpose">${t.purpose}</div>
+                                    </div>
+                                    <span class="trv-status" style="color:${travelStatusColor[t.status] || '#888'}">${t.status}</span>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
-                    <div class="feed-item">
-                        <div class="feed-time">12:30</div>
-                        <div class="feed-content">
-                            <div class="bold">Yeni Sipariş</div>
-                            <div class="text-muted">Acıbadem Maslak için Neuro One PRO siparişi oluşturuldu.</div>
-                        </div>
-                    </div>
-                    <div class="feed-item">
-                        <div class="feed-time">11:15</div>
-                        <div class="feed-content">
-                            <div class="bold text-warning">Stok Uyarısı</div>
-                            <div class="text-muted">Kablo stokları kritik seviyenin altına düştü (5 adet).</div>
-                        </div>
-                    </div>
-                    <div class="feed-item">
-                        <div class="feed-time">10:00</div>
-                        <div class="feed-content">
-                            <div class="bold text-success">Tahsilat</div>
-                            <div class="text-muted">Ankara Şehir Hastanesi ödemesi onaylandı.</div>
-                        </div>
-                    </div>
-                    <div class="feed-item">
-                        <div class="feed-time">09:12</div>
-                        <div class="feed-content">
-                            <div class="bold">Sunucu Yedekleme</div>
-                            <div class="text-muted">Günlük veri tabanı yedeği başarıyla alındı.</div>
+
+                    <!-- Live Feed -->
+                    <div class="cockpit-panel">
+                        <div class="panel-header"><span>⚡ Canlı Akış</span><span class="status-dot ok"></span></div>
+                        <div class="feed-list">
+                            <div class="feed-item"><div class="feed-time">12:45</div><div class="feed-content"><div class="bold">Sistem Girişi</div><div class="text-muted">Eren Çelikten sisteme giriş yaptı</div></div></div>
+                            <div class="feed-item"><div class="feed-time">12:30</div><div class="feed-content"><div class="bold">Yeni Sipariş</div><div class="text-muted">Kayseri Şehir — Respomed eNO x2</div></div></div>
+                            <div class="feed-item"><div class="feed-time">11:15</div><div class="feed-content"><div class="bold text-warning">Stok Uyarısı</div><div class="text-muted">aEEG Elmiko CFM stok: 4 adet (Kritik)</div></div></div>
+                            <div class="feed-item"><div class="feed-time">10:00</div><div class="feed-content"><div class="bold text-success">Tahsilat</div><div class="text-muted">Ankara Bilkent ödemesi ₺320K onaylandı</div></div></div>
+                            <div class="feed-item"><div class="feed-time">09:12</div><div class="feed-content"><div class="bold">Servis Raporu</div><div class="text-muted">EEG-1200JK kalibrasyon tamamlandı</div></div></div>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     `;
 }
