@@ -473,8 +473,8 @@ table tr:hover { background: rgba(255,255,255,0.015); }
     .sidebar.open { left: 0; }
     .sidebar-overlay.active { display: block; }
     .mobile-menu-toggle { display: flex; color: white; }
-    .topbar { position: sticky; top: 0; z-index: 50; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 0 16px; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%; display: flex; align-items: center; justify-content: space-between; }
-    .content { padding: 12px; height: calc(100vh - 60px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .topbar { position: fixed; top: 0; left: 0; right: 0; z-index: 999; background: #0a0a0a; padding: 0 16px; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; }
+    .content { padding: 12px; margin-top: 60px; height: calc(100vh - 60px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .search-box { display: none; }
     
     /* Video Fix for Mobile */
