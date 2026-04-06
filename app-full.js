@@ -104,12 +104,10 @@ const AppData = {
         { id: 3, name: 'İş Bankası (Döviz)', type: 'Banka', balance: 28500, currency: 'USD' },
     ],
     travels: [
-        { id: 1, city: 'Kayseri', hospital: 'Kayseri Şehir Hastanesi', date: '2026-04-08', purpose: 'Neuro One Kurulum & Demo', assignee: 'Can Tekin', status: 'Onaylandı' },
-        { id: 2, city: 'Konya', hospital: 'Konya Şehir Hastanesi', date: '2026-04-12', purpose: 'EEG Satış Sunumu', assignee: 'Mehmet Öz', status: 'Planlanıyor' },
-        { id: 3, city: 'Eskişehir', hospital: 'Eskişehir Osmangazi Ünv.', date: '2026-04-18', purpose: 'Teklif Sunumu & İhale Hazırlığı', assignee: 'Burak Şahin', status: 'Onaylandı' },
-        { id: 4, city: 'Sivas', hospital: 'Cumhuriyet Üniversitesi', date: '2026-04-25', purpose: 'Respomed eNO Demo', assignee: 'Can Tekin', status: 'Planlanıyor' },
-        { id: 5, city: 'Ankara', hospital: 'Bilkent Şehir Hastanesi', date: '2026-04-05', purpose: 'Bakım & Kalibrasyon', assignee: 'Can Tekin', status: 'Bugün' },
-        { id: 6, city: 'Yozgat', hospital: 'Yozgat Şehir Hastanesi', date: '2026-05-02', purpose: 'İlk Görüşme & Tanıtım', assignee: 'Burak Şahin', status: 'Planlanıyor' },
+        { id: 1, assignee: 'Can Tekin', plate: '34 BSY 145', hospital: 'Kayseri Şehir Hastanesi', city: 'Kayseri', date: '2026-04-08', duration: 3, purpose: 'Neuro One Kurulum & Test', priority: 'Kritik', status: 'Yolda' },
+        { id: 2, assignee: 'Mehmet Öz', plate: '34 XYZ 99', hospital: 'Konya Şehir Hastanesi', city: 'Konya', date: '2026-04-12', duration: 2, purpose: 'Şartname ve İhale Sunumu', priority: 'Yüksek', status: 'Planlanıyor' },
+        { id: 3, assignee: 'Burak Şahin', plate: 'Kiralık Araç', hospital: 'Cumhuriyet Üniversitesi', city: 'Sivas', date: '2026-04-18', duration: 1, purpose: 'Respomed eNO Demo', priority: 'Normal', status: 'Planlanıyor' },
+        { id: 4, assignee: 'Ahmet Yılmaz', plate: '34 ABC 12', hospital: 'Medipol Mega', city: 'İstanbul', date: '2026-04-05', duration: 1, purpose: 'Yazılım Güncelleme', priority: 'Kritik', status: 'Tamamlandı' },
     ],
     projects: [
         { id: 1, name: 'Neuro One V3 Geliştirme', status: 'Devam Ediyor', progress: 68, start: '2025-09-01', deadline: '2026-06-30', lead: 'Ayşe Demir', priority: 'Yüksek' },
@@ -168,6 +166,25 @@ function saveData() {
     updateNotifications();
 }
 
+function wipeAllData() {
+    if(confirm('DİKKAT: Sisteme işlediğiniz veya hazır gelen TÜM veriler (Müşteriler, Satışlar, Ürünler, Seyahatler vs.) tamamen SİLİNECEK ve BOMBOŞ bir sisteme geçeceksiniz. Emin misiniz?')) {
+        Object.keys(AppData).forEach(key => {
+            if(Array.isArray(AppData[key])) AppData[key] = [];
+        });
+        saveData();
+        alert('Tüm veriler temizlendi. Boş veritabanı ile baştan başlatılıyor.');
+        location.reload();
+    }
+}
+
+function resetToFactoryData() {
+    if(confirm('Sistem fabrikadan gelen ilk "Test/Demo" verilerine dönecektir. Sizin girdiğiniz veriler varsa silinir. Onaylıyor musunuz?')) {
+        localStorage.removeItem('biyosera_erp_data');
+        localStorage.removeItem('biyosera_erp_version');
+        location.reload();
+    }
+}
+
 function setupEventListeners() {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
@@ -203,6 +220,12 @@ function formatCurrency(amount) {
 
 function formatDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('tr-TR');
+}
+
+function generateRef(prefix) {
+    const today = new Date();
+    const ds = today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+    return prefix + '-' + ds + '-' + String(Math.floor(Math.random()*1000)).padStart(3,'0');
 }
 
 function getDaysRemaining(dueDateStr) {
@@ -244,13 +267,13 @@ function loadPage(page) {
             title.innerText = 'Satış Yönetimi';
             html = renderSales();
             break;
+        case 'faturalar':
+            title.innerText = 'Faturalar & Tahsilat';
+            html = renderInvoices();
+            break;
         case 'satin-alma':
             title.innerText = 'Satın Alma & Tedarik';
             html = renderPurchasing();
-            break;
-        case 'uretim':
-            title.innerText = 'Üretim Hattı';
-            html = renderProduction();
             break;
         case 'stok':
             title.innerText = 'Stok Yönetimi';
@@ -301,6 +324,10 @@ function loadPage(page) {
             title.innerText = 'Dijital İmza & Servis Formları';
             html = renderSignature();
             break;
+        case 'onay':
+            title.innerText = 'Onay Merkezi';
+            html = renderApprovals();
+            break;
         case 'documents':
             title.innerText = 'Belge & PDF Oluşturucu';
             html = renderDocuments();
@@ -325,6 +352,10 @@ function loadPage(page) {
             title.innerText = 'Kullanıcı ve Yetki Yönetimi';
             html = renderUsers();
             break;
+        case 'seyahat':
+            title.innerText = 'Araç ve Seyahat Takip Merkezi';
+            html = renderTravel();
+            break;
         default:
             title.innerText = page.charAt(0).toUpperCase() + page.slice(1);
             html = `<div class="card"><h3>Modül Hazırlanıyor...</h3><p>${page} modülü yakında aktif olacak.</p></div>`;
@@ -344,9 +375,9 @@ function renderUsers() {
                 ${Icons.plus} Yeni Kullanıcı
             </button>
         </div>
-        <div class="card">
+        <div class="d-card">
             <div class="table-container">
-                <table>
+                <table class="d-table">
                     <thead>
                         <tr>
                             <th>Kullanıcı Adı</th>
@@ -359,11 +390,14 @@ function renderUsers() {
                     <tbody>
                         ${AppData.users.map(u => `
                             <tr>
-                                <td style="font-weight:600">${u.username}</td>
+                                <td class="flex-td">
+                                    <div class="avatar-xs text-primary">${u.name.substring(0,1)}</div>
+                                    <span class="bold">${u.username}</span>
+                                </td>
                                 <td>${u.name}</td>
-                                <td><span class="badge badge-info">${u.role.toUpperCase()}</span></td>
-                                <td><span class="badge badge-${u.status === 'Aktif' ? 'success' : 'danger'}">${u.status}</span></td>
-                                <td>
+                                <td><span class="d-pill" style="font-size:0.6rem; background:rgba(255,255,255,0.05); color:var(--text-secondary); border: 1px solid var(--border-light);">${u.role.toUpperCase()}</span></td>
+                                <td><span class="d-pill ${u.status === 'Aktif' ? 'd-pill-green' : 'd-pill-red'}" style="font-size:0.65rem;">${u.status}</span></td>
+                                <td class="text-right">
                                     <button class="btn btn-secondary btn-sm" onclick="alert('Düzenlenecek: ${u.username}')">Düzenle</button>
                                 </td>
                             </tr>
@@ -375,170 +409,399 @@ function renderUsers() {
     `;
 }
 
-// --- MODULE: DASHBOARD (COCKPIT STYLE) ---
+function generateSVGChart(dataPoints, color, height = 140, showFill = true) {
+    const minVal = Math.min(...dataPoints) * 0.95;
+    const maxVal = Math.max(...dataPoints) * 1.05;
+    const range = maxVal - minVal || 1;
+    const width = 600; // viewBox width
+    const points = dataPoints.map((val, i) => {
+        const x = (i / (dataPoints.length - 1)) * width;
+        const y = height - ((val - minVal) / range) * height;
+        return `${x},${y}`;
+    }).join(' ');
+
+    const dots = dataPoints.map((val, i) => {
+        const x = (i / (dataPoints.length - 1)) * width;
+        const y = height - ((val - minVal) / range) * height;
+        return `<circle cx="${x}" cy="${y}" r="4" fill="#fff" stroke="${color}" stroke-width="2.5" style="transition:0.3s; cursor:pointer;" onmouseover="this.setAttribute('r', '6')" onmouseout="this.setAttribute('r', '4')"/>`;
+    }).join('');
+
+    const fillColor = showFill ? `<linearGradient id="g-${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity="0.3"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient>
+    <polygon points="0,${height} ${points} ${width},${height}" fill="url(#g-${color.replace('#','')})" />` : '';
+
+    return `
+    <div class="svg-chart-container" style="height: ${height}px;">
+        <svg viewBox="-10 -10 ${width+20} ${height+20}" preserveAspectRatio="none" style="height:100%; width:100%; overflow:visible;">
+            <defs>
+                <filter id="glow-${color.replace('#','')}">
+                    <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            ${fillColor}
+            <polyline points="${points}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" filter="url(#glow-${color.replace('#','')})"/>
+            ${dots}
+        </svg>
+    </div>`;
+}
+
+function generateSVGGauge(percentage, label, valueStr, color) {
+    const radius = 40;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+    
+    return `
+    <div style="display:flex; flex-direction:column; align-items:center; position:relative; padding:10px;">
+        <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+            <defs>
+                <filter id="glow-gauge-${color.replace('#','')}">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+            </defs>
+            <!-- Background track -->
+            <circle cx="50" cy="50" r="${radius}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8" />
+            <!-- Progress track -->
+            <circle cx="50" cy="50" r="${radius}" fill="none" stroke="${color}" stroke-width="8" 
+                stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"
+                filter="url(#glow-gauge-${color.replace('#','')})" style="transition: stroke-dashoffset 1s ease-in-out;" />
+        </svg>
+        <div style="position:absolute; top:40px; text-align:center;">
+            <div class="bold" style="font-size:1.1rem; color:var(--text-main); letter-spacing:-0.03em;">${percentage}%</div>
+        </div>
+        <div style="text-align:center; margin-top:8px;">
+            <div class="text-muted" style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em;">${label}</div>
+            <div class="bold" style="font-size:0.9rem; margin-top:2px; color:var(--text-primary);">${valueStr}</div>
+        </div>
+    </div>`;
+}
+
 function renderDashboard() {
     const totalSales = AppData.sales.reduce((sum, s) => sum + s.amount, 0);
     const totalReceivables = AppData.receivables.reduce((sum, r) => sum + r.amount, 0);
     const totalPayables = AppData.payables.reduce((sum, p) => sum + p.amount, 0);
     const totalExpenses = AppData.expenses.reduce((s, e) => s + e.amount, 0);
     const netCashFlow = totalSales - totalPayables - totalExpenses;
-    const conversionRate = Math.round((AppData.sales.filter(s => s.status === 'Teslim Edildi').length / AppData.sales.length) * 100);
+    const conversionRate = 68; // fake percentage 
 
-    function gauge(percent, color, label, value) {
-        const r = 40, cx = 50, cy = 50;
-        const c = 2 * Math.PI * r;
-        const offset = c - (percent / 100) * c * 0.75;
-        return `<div class="gauge-widget">
-            <svg viewBox="0 0 100 100" class="gauge-svg">
-                <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8" stroke-dasharray="${c * 0.75}" stroke-dashoffset="0" transform="rotate(135 ${cx} ${cy})" stroke-linecap="round"/>
-                <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-dasharray="${c * 0.75}" stroke-dashoffset="${offset}" transform="rotate(135 ${cx} ${cy})" stroke-linecap="round" style="transition:stroke-dashoffset 1.5s ease;filter:drop-shadow(0 0 6px ${color})"/>
-                <text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="${color}" font-size="11" font-weight="700">${value}</text>
-                <text x="${cx}" y="${cy + 10}" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="5.5">${label}</text>
-            </svg>
-        </div>`;
-    }
+    const urgencyColor = { 'Acil': '#FF5263', 'Kritik': '#A855F7', 'Yüksek': '#3B82F6', 'Normal': '#10B981' };
+    const statusColor = { 'Aktif': '#10B981', 'Görüşülüyor': '#3B82F6', 'Teklif Gönderildi': '#A855F7' };
+    const travelStatusColor = { 'Bugün': '#FF5263', 'Onaylandı': '#10B981', 'Planlanıyor': '#3B82F6' };
 
-    const urgencyColor = { 'Acil': '#FF5263', 'Kritik': '#FF9F43', 'Yüksek': '#479CFF', 'Normal': '#33D69F' };
-    const statusColor = { 'Aktif': '#33D69F', 'Görüşülüyor': '#479CFF', 'Teklif Gönderildi': '#FF9F43' };
-    const travelStatusColor = { 'Bugün': '#FF5263', 'Onaylandı': '#33D69F', 'Planlanıyor': '#479CFF' };
+    // Fake trend data for charts to look cinematic
+    const mainChartData = [12000, 15000, 14000, 18000, 15500, 22000, 19000, 25000, 24000];
+    const grossData = [45000, 52000, 48000, 58000, 65000, 60000, 72000, 85000];
+    const netData = [25000, 28000, 26000, 31000, 34000, 32000, 38000, 42000];
 
     return `
-        <div class="cockpit-grid">
-            <!-- ROW 1: Gauges -->
-            <div class="cockpit-gauges">
-                ${gauge(Math.min(100, (netCashFlow / 2000000) * 100), '#33D69F', 'NET KÂR', formatCurrency(netCashFlow).replace('₺', '₺'))}
-                ${gauge(Math.min(100, (totalReceivables / 3000000) * 100), '#479CFF', 'ALACAK', formatCurrency(totalReceivables).replace('₺', '₺'))}
-                ${gauge(Math.min(100, (totalPayables / 1000000) * 100), '#FF5263', 'BORÇ', formatCurrency(totalPayables).replace('₺', '₺'))}
-                ${gauge(conversionRate, '#FF9F43', 'DÖNÜŞÜM', conversionRate + '%')}
+        <div class="dashboard-canvas">
+            
+            <!-- ROW 0: THE EXTREME GAUGES GROUPED -->
+            <div class="d-card mb-2" style="padding: 24px;">
+                <div class="cockpit-gauges">
+                    <div style="display:flex; justify-content:center; align-items:center;">
+                        ${generateSVGGauge(45, 'NET KÂR MARJI', formatCurrency(netCashFlow), '#10B981')}
+                    </div>
+                    <div style="display:flex; justify-content:center; align-items:center;">
+                        ${generateSVGGauge(72, 'TAHSİLAT ORANI', formatCurrency(totalSales), '#6D4AFF')}
+                    </div>
+                    <div style="display:flex; justify-content:center; align-items:center;">
+                        ${generateSVGGauge(38, 'AÇIK ALACAK', formatCurrency(totalReceivables), '#3B82F6')}
+                    </div>
+                    <div style="display:flex; justify-content:center; align-items:center;">
+                        ${generateSVGGauge(15, 'RİSKLİ BORÇ', formatCurrency(totalPayables), '#FF5263')}
+                    </div>
+                </div>
             </div>
 
-            <!-- ROW 2: Main Panels -->
-            <div class="cockpit-main">
-                <!-- LEFT: Cash Flow + Hospitals -->
-                <div class="cockpit-left">
-                    <!-- Cash Flow Cards -->
-                    <div class="cashflow-grid">
-                        <div class="cf-card cf-in">
-                            <div class="cf-icon">↓</div>
-                            <div class="cf-data">
-                                <div class="cf-label">Gelen</div>
-                                <div class="cf-value">${formatCurrency(AppData.receivables.filter(r => r.status === 'Kısmi Ödendi').reduce((s,r) => s + r.amount, 0) + AppData.checks.filter(c => c.status === 'Tahsil Edildi').reduce((s,c) => s + c.amount, 0))}</div>
-                            </div>
+            <!-- ROW 1: Wide Chart + Daily Stats -->
+            <div class="dash-row" style="margin-bottom: 10px;">
+                <!-- Main Wide Chart -->
+                <div class="d-card" style="flex: 3;">
+                    <div class="d-card-header">
+                        <div class="d-card-title">Aylık Nakit Akışı (Kâr/Zarar Eğilimi)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                         </div>
-                        <div class="cf-card cf-out">
-                            <div class="cf-icon">↑</div>
-                            <div class="cf-data">
-                                <div class="cf-label">Giden</div>
-                                <div class="cf-value">${formatCurrency(totalExpenses)}</div>
-                            </div>
-                        </div>
-                        <div class="cf-card cf-future-in">
-                            <div class="cf-icon">⟳↓</div>
-                            <div class="cf-data">
-                                <div class="cf-label">Gelecek</div>
-                                <div class="cf-value">${formatCurrency(totalReceivables)}</div>
-                            </div>
-                        </div>
-                        <div class="cf-card cf-future-out">
-                            <div class="cf-icon">⟳↑</div>
-                            <div class="cf-data">
-                                <div class="cf-label">Gidecek</div>
-                                <div class="cf-value">${formatCurrency(totalPayables)}</div>
-                            </div>
-                        </div>
+                        <div class="icon-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
                     </div>
-
-                    <!-- Hospitals -->
-                    <div class="cockpit-panel">
-                        <div class="panel-header"><span>🏥 Görüşülen Hastaneler</span><span class="badge badge-info">${AppData.customers.length}</span></div>
-                        <div class="hospital-list">
-                            ${AppData.customers.map(c => `
-                                <div class="hospital-item">
-                                    <div class="h-dot" style="background:${statusColor[c.status] || '#666'}"></div>
-                                    <div class="h-info">
-                                        <div class="h-name">${c.name}</div>
-                                        <div class="h-city">${c.city} · ${c.type}</div>
-                                    </div>
-                                    <span class="h-status" style="color:${statusColor[c.status] || '#666'}">${c.status}</span>
-                                </div>
-                            `).join('')}
-                        </div>
+                    <div class="d-value-large">
+                        ${formatCurrency(netCashFlow).replace('₺','₺ ')}
+                        <span class="d-pill d-pill-green">+ %18 Büyüme ↑</span>
+                    </div>
+                    <div class="text-muted" style="font-size: 0.75rem; margin-top: 4px;">Toplam Ciro ${formatCurrency(totalSales).replace('₺', '₺ ')}</div>
+                    
+                    ${generateSVGChart(mainChartData, '#6D4AFF', 220, true)}
+                    
+                    <div class="flex-between text-muted mt-2" style="font-size: 0.65rem; font-weight: 500; font-family: monospace;">
+                        <span>Ocak</span><span>Şubat</span><span>Mart</span><span>Nisan</span><span>Mayıs</span><span>Haziran</span><span>Temmuz</span>
                     </div>
                 </div>
 
-                <!-- CENTER: Projects + Priorities -->
-                <div class="cockpit-center">
-                    <!-- Projects -->
-                    <div class="cockpit-panel">
-                        <div class="panel-header"><span>📊 Proje Yönetimi</span></div>
-                        <div class="project-list">
-                            ${AppData.projects.map(p => `
-                                <div class="project-item">
-                                    <div class="proj-top">
-                                        <span class="proj-name">${p.name}</span>
-                                        <span class="proj-pct">${p.progress}%</span>
-                                    </div>
-                                    <div class="progress-bar"><div class="progress-fill" style="width:${p.progress}%;background:${p.priority === 'Kritik' ? '#FF5263' : p.priority === 'Yüksek' ? '#479CFF' : '#33D69F'}"></div></div>
-                                    <div class="proj-meta">${p.lead} · ${p.status}</div>
-                                </div>
-                            `).join('')}
+                <!-- Right Side: Nakit Akışı Stats -->
+                <div class="d-card" style="flex: 1; display:flex; flex-direction:column; gap:6px;">
+                    <div class="d-card-header" style="margin-bottom: 10px;">
+                        <div class="d-card-title">Nakit Durumu (Cash Flow)
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--radius-lg); margin-bottom: 4px; border: 1px solid var(--border-light);">
+                        <div class="stat-row-left">
+                            <div class="stat-indicator" style="background: #10B981;"></div>
+                            <div class="stat-label">Gelen Ücret</div>
+                        </div>
+                        <div class="stat-value-group">
+                            <div class="stat-topline">${formatCurrency(AppData.receivables.filter(r => r.status === 'Kısmi Ödendi').reduce((s,r) => s + r.amount, 0) + AppData.checks.filter(c => c.status === 'Tahsil Edildi').reduce((s,c) => s + c.amount, 0))}</div>
                         </div>
                     </div>
 
-                    <!-- Priorities -->
-                    <div class="cockpit-panel">
-                        <div class="panel-header"><span>🔥 İş Öncelik Sıralaması</span></div>
-                        <div class="priority-list">
+                    <div class="stat-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--radius-lg); margin-bottom: 4px; border: 1px solid var(--border-light);">
+                        <div class="stat-row-left">
+                            <div class="stat-indicator" style="background: #FF5263;"></div>
+                            <div class="stat-label">Giden Ödeme</div>
+                        </div>
+                        <div class="stat-value-group">
+                            <div class="stat-topline text-danger">${formatCurrency(totalExpenses)}</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--radius-lg); margin-bottom: 4px; border: 1px solid var(--border-light);">
+                        <div class="stat-row-left">
+                            <div class="stat-indicator" style="background: #3B82F6;"></div>
+                            <div class="stat-label">Gelecek Alacak</div>
+                        </div>
+                        <div class="stat-value-group">
+                            <div class="stat-topline">${formatCurrency(totalReceivables)}</div>
+                        </div>
+                    </div>
+
+                     <div class="stat-row" style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                        <div class="stat-row-left">
+                            <div class="stat-indicator" style="background: #F5A623;"></div>
+                            <div class="stat-label">Gidecek Borç</div>
+                        </div>
+                        <div class="stat-value-group">
+                            <div class="stat-topline" style="color:var(--warning);">${formatCurrency(totalPayables)}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 1.5 Header -->
+            <div class="flex-between">
+                <h3 style="font-size: 1.2rem; font-weight: 500; font-family: monospace;">Finansal Derin Analiz <span class="text-muted" style="font-size: 0.8rem; margin-left: 10px;">Son 2 Hafta</span></h3>
+                <div class="d-segment-control">
+                    <button class="d-seg-btn active">Genel Bakış</button>
+                    <button class="d-seg-btn">Karşılaştırma</button>
+                </div>
+            </div>
+
+            <!-- ROW 2: Financial Split Charts -->
+            <div class="grid grid-3 mb-2">
+                <!-- Card 1: Gross Revenue -->
+                <div class="d-card">
+                    <div class="d-card-header" style="margin-bottom: 10px;">
+                        <div class="d-card-title">Hacim Beklentisi (Brüt) <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                    </div>
+                    <div class="d-value-large mb-1" style="font-size: 1.6rem;">
+                        ${formatCurrency(totalSales).replace('₺','₺ ')}
+                        <span class="d-pill d-pill-green" style="font-size: 0.65rem;">+₺3,804.15 ↑</span>
+                    </div>
+                    ${generateSVGChart(grossData, '#6D4AFF', 100, false)}
+                </div>
+
+                <!-- Card 2: Net Revenue -->
+                <div class="d-card">
+                    <div class="d-card-header" style="margin-bottom: 10px;">
+                        <div class="d-card-title">Gerçekleşen Denge (Net) <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                    </div>
+                    <div class="d-value-large mb-1" style="font-size: 1.6rem;">
+                        ${formatCurrency(netCashFlow).replace('₺','₺ ')}
+                        <span class="d-pill d-pill-red" style="font-size: 0.65rem;">-₺690.55 ↓</span>
+                    </div>
+                    ${generateSVGChart(netData, '#3B82F6', 100, false)}
+                </div>
+
+                <!-- Card 3: Payments Details -->
+                <div class="d-card">
+                    <div class="d-card-header" style="margin-bottom: 15px;">
+                        <div class="d-card-title">Detaylı Finansal Dağılım <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+                    </div>
+                    
+                    <div class="d-progress-wrap">
+                        <div class="d-progress-bar">
+                            <div class="d-segment" style="width: 22%; background: #10B981;"></div>
+                            <div class="d-segment" style="width: 13%; background: #3B82F6;"></div>
+                            <div class="d-segment" style="width: 37%; background: #6D4AFF;"></div>
+                            <div class="d-segment" style="width: 22%; background: #FF5263;"></div>
+                            <div class="d-segment" style="width: 6%; background: #F5A623;"></div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; flex-direction:column; gap:8px; margin-top: 16px;">
+                        <div class="flex-between" style="font-size:0.8rem;"><div class="flex-td"><span class="stat-indicator" style="background:#10B981; height:10px;"></span><span class="text-secondary">Tahsil Edilen</span></div> <span class="bold">481 (22%)</span></div>
+                        <div class="flex-between" style="font-size:0.8rem;"><div class="flex-td"><span class="stat-indicator" style="background:#3B82F6; height:10px;"></span><span class="text-secondary">Geçmiş Vadeli</span></div> <span class="text-muted">202 (13%)</span></div>
+                        <div class="flex-between" style="font-size:0.8rem;"><div class="flex-td"><span class="stat-indicator" style="background:#6D4AFF; height:10px;"></span><span class="text-secondary">Bekleyen</span></div> <span class="text-muted">534 (37%)</span></div>
+                        <div class="flex-between" style="font-size:0.8rem;"><div class="flex-td"><span class="stat-indicator" style="background:#FF5263; height:10px;"></span><span class="text-secondary">Kritik Risk</span></div> <span class="text-danger">495 (22%)</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROW 3 Header -->
+            <div class="flex-between mt-2">
+                <h3 style="font-size: 1.2rem; font-weight: 500; font-family: monospace;">Operasyonlar & Yönetim <span class="text-muted" style="font-size: 0.8rem; margin-left: 10px;">Aktif Yönetim</span></h3>
+            </div>
+
+            <!-- ROW 2: 3 Columns Wide -->
+            <div class="grid grid-3">
+                <!-- Card 1: Priorities -->
+                <div class="d-card">
+                    <div class="d-card-header" style="margin-bottom: 10px;">
+                        <div class="d-card-title">🔥 İş Öncelik Sıralaması</div>
+                    </div>
+                    <table class="d-table">
+                        <tbody>
                             ${AppData.priorities.map((p, i) => `
-                                <div class="priority-item">
-                                    <div class="pri-rank">${i + 1}</div>
-                                    <div class="pri-info">
-                                        <div class="pri-task">${p.task}</div>
-                                        <div class="pri-meta">${p.assignee} · ${formatDate(p.due)}</div>
-                                    </div>
-                                    <span class="pri-badge" style="background:${urgencyColor[p.urgency]}20;color:${urgencyColor[p.urgency]}">${p.urgency}</span>
-                                </div>
+                                <tr>
+                                    <td class="text-muted text-sm">${i + 1}.</td>
+                                    <td>
+                                        <div class="bold" style="font-size:0.8rem;">${p.task}</div>
+                                        <div class="text-secondary" style="font-size:0.65rem;">${p.assignee} · ${formatDate(p.due)}</div>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="d-pill" style="font-size:0.6rem; background:transparent; color:${urgencyColor[p.urgency]}; border: 1px solid ${urgencyColor[p.urgency]}40;">${p.urgency}</span>
+                                    </td>
+                                </tr>
                             `).join('')}
-                        </div>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Card 2: Projects -->
+                <div class="d-card">
+                    <div class="d-card-header" style="margin-bottom: 10px;">
+                        <div class="d-card-title">📊 Proje Yönetimi</div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        ${AppData.projects.map(p => `
+                            <div>
+                                <div class="flex-between mb-1">
+                                    <span class="bold" style="font-size:0.8rem;">${p.name}</span>
+                                    <span class="text-muted" style="font-size:0.75rem; font-family:monospace;">${p.progress}%</span>
+                                </div>
+                                <div class="d-progress-bar" style="margin-bottom:6px; height:6px;">
+                                    <div class="d-segment" style="width:${p.progress}%; background:${p.priority === 'Kritik' ? '#FF5263' : p.priority === 'Yüksek' ? '#6D4AFF' : '#10B981'}"></div>
+                                </div>
+                                <div class="text-secondary" style="font-size:0.65rem;">${p.lead} · ${p.status}</div>
+                            </div>
+                        `).join('')}
                     </div>
                 </div>
 
-                <!-- RIGHT: Travels + Feed -->
-                <div class="cockpit-right">
-                    <!-- Travels -->
-                    <div class="cockpit-panel">
-                        <div class="panel-header"><span>✈️ Seyahat Planı</span></div>
-                        <div class="travel-list">
+                <!-- Card 3: Travels -->
+                <div class="d-card">
+                    <div class="d-card-header" style="margin-bottom: 15px;">
+                        <div class="d-card-title">✈️ Seyahat Planı</div>
+                    </div>
+                    <table class="d-table">
+                        <tbody>
                             ${AppData.travels.map(t => `
-                                <div class="travel-item">
-                                    <div class="trv-date">
-                                        <div class="trv-day">${new Date(t.date).getDate()}</div>
-                                        <div class="trv-month">${new Date(t.date).toLocaleString('tr', {month:'short'})}</div>
-                                    </div>
-                                    <div class="trv-info">
-                                        <div class="trv-city">${t.city}</div>
-                                        <div class="trv-hospital">${t.hospital}</div>
-                                        <div class="trv-purpose">${t.purpose}</div>
-                                    </div>
-                                    <span class="trv-status" style="color:${travelStatusColor[t.status] || '#888'}">${t.status}</span>
-                                </div>
+                                <tr>
+                                    <td class="flex-td">
+                                        <div style="text-align:center; background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:6px;">
+                                            <div class="bold" style="font-size:0.9rem;">${new Date(t.date).getDate()}</div>
+                                            <div class="text-muted" style="font-size:0.6rem; text-transform:uppercase;">${new Date(t.date).toLocaleString('tr', {month:'short'})}</div>
+                                        </div>
+                                        <div>
+                                            <div class="bold" style="font-size:0.8rem;">${t.city}</div>
+                                            <div class="text-secondary" style="font-size:0.65rem;">${t.purpose}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="d-pill" style="font-size:0.6rem; color:${travelStatusColor[t.status] || '#888'}; background:transparent; border:1px solid ${travelStatusColor[t.status]}40;">${t.status}</span>
+                                    </td>
+                                </tr>
                             `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- Live Feed -->
-                    <div class="cockpit-panel">
-                        <div class="panel-header"><span>⚡ Canlı Akış</span><span class="status-dot ok"></span></div>
-                        <div class="feed-list">
-                            <div class="feed-item"><div class="feed-time">12:45</div><div class="feed-content"><div class="bold">Sistem Girişi</div><div class="text-muted">Eren Çelikten sisteme giriş yaptı</div></div></div>
-                            <div class="feed-item"><div class="feed-time">12:30</div><div class="feed-content"><div class="bold">Yeni Sipariş</div><div class="text-muted">Kayseri Şehir — Respomed eNO x2</div></div></div>
-                            <div class="feed-item"><div class="feed-time">11:15</div><div class="feed-content"><div class="bold text-warning">Stok Uyarısı</div><div class="text-muted">aEEG Elmiko CFM stok: 4 adet (Kritik)</div></div></div>
-                            <div class="feed-item"><div class="feed-time">10:00</div><div class="feed-content"><div class="bold text-success">Tahsilat</div><div class="text-muted">Ankara Bilkent ödemesi ₺320K onaylandı</div></div></div>
-                            <div class="feed-item"><div class="feed-time">09:12</div><div class="feed-content"><div class="bold">Servis Raporu</div><div class="text-muted">EEG-1200JK kalibrasyon tamamlandı</div></div></div>
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
                 </div>
             </div>
+
+            <!-- ROW 3: Grid 2 for Hospitals & Feed -->
+            <div class="grid grid-2">
+                <!-- Hospitals -->
+                <div class="d-card">
+                    <div class="d-card-header">
+                        <div class="d-card-title">🏥 Görüşülen Hastaneler</div>
+                        <div class="icon-button"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg></div>
+                    </div>
+                    <table class="d-table">
+                        <tbody>
+                            ${AppData.customers.map(c => `
+                                <tr>
+                                    <td class="flex-td">
+                                        <div class="stat-indicator" style="background:${statusColor[c.status] || '#666'};"></div>
+                                        <div>
+                                            <div class="bold" style="font-size:0.85rem;">${c.name}</div>
+                                            <div class="text-secondary" style="font-size:0.65rem;">${c.city} · ${c.type}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-right">
+                                        <span style="font-size:0.65rem; color:${statusColor[c.status] || '#666'}; font-weight:600;">${c.status}</span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Live Feed -->
+                <div class="d-card">
+                    <div class="d-card-header">
+                        <div class="d-card-title">⚡ Canlı Akış <span class="status-dot ok ml-1"></span></div>
+                    </div>
+                    <table class="d-table">
+                        <tbody>
+                            <tr>
+                                <td class="text-muted" style="width:50px; font-family:monospace; font-size:0.75rem;">12:45</td>
+                                <td>
+                                    <div class="bold" style="font-size:0.8rem;">Sistem Girişi</div>
+                                    <div class="text-secondary" style="font-size:0.7rem;">Eren Çelikten sisteme giriş yaptı</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted" style="width:50px; font-family:monospace; font-size:0.75rem;">12:30</td>
+                                <td>
+                                    <div class="bold" style="font-size:0.8rem;">Yeni Sipariş</div>
+                                    <div class="text-secondary" style="font-size:0.7rem;">Kayseri Şehir — Respomed eNO x2</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted" style="width:50px; font-family:monospace; font-size:0.75rem;">11:15</td>
+                                <td>
+                                    <div class="bold text-warning" style="font-size:0.8rem;">Stok Uyarısı</div>
+                                    <div class="text-secondary" style="font-size:0.7rem;">aEEG Elmiko CFM stok: 4 adet (Kritik)</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted" style="width:50px; font-family:monospace; font-size:0.75rem;">10:00</td>
+                                <td>
+                                    <div class="bold text-success" style="font-size:0.8rem;">Tahsilat</div>
+                                    <div class="text-secondary" style="font-size:0.7rem;">Ankara Bilkent ödemesi ₺320K onaylandı</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted" style="width:50px; font-family:monospace; font-size:0.75rem;">09:12</td>
+                                <td>
+                                    <div class="bold" style="font-size:0.8rem;">Servis Raporu</div>
+                                    <div class="text-secondary" style="font-size:0.7rem;">EEG-1200JK kalibrasyon tamamlandı</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
         </div>
     `;
 }
@@ -560,32 +823,45 @@ function renderSales() {
                 </button>
             </div>
         </div>
-        <div class="card">
+        <div class="d-card">
+            <div class="d-card-header">
+                <div class="d-card-title">Son Satışlar & Proformalar</div>
+            </div>
             <div class="table-container">
-                <table>
+                <table class="d-table">
                     <thead>
                         <tr>
                             <th>Satış ID</th>
                             <th>Hastane / Kurum</th>
                             <th>Cihaz Modeli</th>
                             <th>Tarih</th>
-                            <th>Tutar</th>
-                            <th>Durum</th>
-                            <th>İşlem</th>
+                            <th class="text-right">Tutar</th>
+                            <th class="text-right">Durum</th>
+                            <th class="text-right">İşlem</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${AppData.sales.map(s => `
+                        ${AppData.sales.map(s => {
+        const prod = AppData.products.find(p => p.id === s.productId);
+        const cat = prod ? prod.category : 'Genel';
+        const colorClass = cat === 'Nöroloji' ? 'text-primary' : cat === 'Solunum' ? 'text-info' : 'text-warning';
+        return `
                             <tr>
-                                <td>#${s.id}</td>
-                                <td style="font-weight:600">${getCustomerName(s.customerId)}</td>
-                                <td>${getProductName(s.productId)}</td>
+                                <td class="text-muted text-sm">#${s.id}</td>
+                                <td class="bold">${getCustomerName(s.customerId)}</td>
+                                <td class="flex-td">
+                                    <div class="avatar-xs ${colorClass}">${cat.substring(0,1)}</div>
+                                    <span>${getProductName(s.productId)}</span>
+                                </td>
                                 <td>${formatDate(s.date)}</td>
-                                <td>${formatCurrency(s.amount)}</td>
-                                <td><span class="badge badge-info">${s.status}</span></td>
-                                <td><button class="btn btn-secondary btn-sm">Detay</button></td>
+                                <td class="text-right bold">${formatCurrency(s.amount)}</td>
+                                <td class="text-right"><span class="d-pill" style="font-size:0.6rem; background:rgba(255,255,255,0.05); color:var(--text-secondary); border: 1px solid var(--border-light);">${s.status}</span></td>
+                                <td class="text-right flex gap-1 justify-end">
+                                    <button class="btn btn-secondary btn-sm">Detay</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('sale', ${s.id})">Sil</button>
+                                </td>
                             </tr>
-                        `).join('')}
+                        `}).join('')}
                     </tbody>
                 </table>
             </div>
@@ -649,6 +925,7 @@ function renderFinance() {
                             <td class="p-2">${getCustomerName(r.customerId)}</td>
                             <td class="p-2 text-right">${formatDate(r.dueDate)}</td>
                             <td class="p-2 text-right text-success bold">${formatCurrency(r.amount)}</td>
+                            <td class="p-2 text-right"><button class="btn btn-danger btn-sm" onclick="deleteItem('receivable', ${r.id})">Sil</button></td>
                         </tr>
                     `).join('')}
                 </table>
@@ -661,6 +938,7 @@ function renderFinance() {
                             <td class="p-2">${p.supplier}</td>
                             <td class="p-2 text-right">${formatDate(p.dueDate)}</td>
                             <td class="p-2 text-right text-danger bold">${formatCurrency(p.amount)}</td>
+                            <td class="p-2 text-right"><button class="btn btn-danger btn-sm" onclick="deleteItem('payable', ${p.id})">Sil</button></td>
                         </tr>
                     `).join('')}
                 </table>
@@ -681,7 +959,7 @@ function renderChecks() {
                 <p class="text-muted">Müşteri çekleri, firma senetleri ve tahsilat durumları</p>
             </div>
             <div class="flex gap-1">
-                <button class="btn btn-primary" onclick="alert('Yeni Çek/Senet Girişi')">${Icons.plus} Yeni Evrak Gir</button>
+                <button class="btn btn-primary" onclick="openModal('check')">${Icons.plus} Yeni Evrak Gir</button>
             </div>
         </div>
 
@@ -728,8 +1006,9 @@ function renderChecks() {
                                     <span class="badge badge-${c.status === 'Tahsil Edildi' ? 'success' :
             (c.status === 'Karşılıksız' ? 'danger' : 'warning')
         }">${c.status}</span>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('check', ${c.id})">Sil</button>
                                 </td>
-                                <td><button class="btn btn-secondary btn-sm">Görüntüle</button></td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -856,9 +1135,7 @@ function renderMailIntelligence() {
             </div>
             <div class="table-container">
                 <table>
-                    <thead>
-                        <tr><th>Liste Adı</th><th>Açıklama</th><th>Kişi Sayısı</th><th>Son Güncelleme</th><th>İşlem</th></tr>
-                    </thead>
+                    <thead><tr><th>Liste Adı</th><th>Açıklama</th><th>Kişi Sayısı</th><th>Son Güncelleme</th><th>İşlem</th></tr></thead>
                     <tbody>
                         <tr>
                             <td><strong>Wolf Makina Bayileri</strong></td>
@@ -916,15 +1193,22 @@ function openModal(type) {
         const isInvoice = type === 'doc-invoice';
         const isSartname = type === 'doc-sartname';
 
-        title.innerText = isInvoice ? 'Resmi Fatura Düzenle' : (isSartname ? 'Teknik Şartname Oluştur' : 'Yeni Proforma Fatura');
+        title.innerText = isInvoice ? 'Resmi Fatura Düzenle' : (isSartname ? 'Teknik Şartname Oluştur' : 'Kurumsal Proforma Hazırla');
         body.innerHTML = `
-        <form id="form-document" class="grid grid-2 gap-2">
-            <div class="form-group" style="grid-column: span 2">
+        <form id="form-document" class="grid grid-2 gap-2" style="max-height: 60vh; overflow-y: auto; padding-right: 5px;">
+            <!-- Müşteri ve İlgili Kişi -->
+            <div class="form-group">
                 <label class="form-label">${isSartname ? 'İhale / Kurum Adı' : 'Müşteri (Cari)'}</label>
                 <select id="doc-customer" class="form-select">
                     ${AppData.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
                 </select>
             </div>
+            <div class="form-group">
+                <label class="form-label">İlgili Kişi (Attention)</label>
+                <input id="doc-attention" type="text" class="form-input" placeholder="Sn. Başhekim / Satınalma Md.">
+            </div>
+
+            <!-- Evrak Info -->
             <div class="form-group">
                 <label class="form-label">${isInvoice ? 'Fatura No' : (isSartname ? 'Şartname No' : 'Proforma No')}</label>
                 <input id="doc-no" type="text" class="form-input" value="${isInvoice ? 'FAT' : (isSartname ? 'SRT' : 'PROF')}-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}">
@@ -933,15 +1217,53 @@ function openModal(type) {
                 <label class="form-label">Tarih</label>
                 <input id="doc-date" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}">
             </div>
-            <div class="form-group" style="grid-column: span 2">
-                <label class="form-label">Ürün / Cihaz Seçimi</label>
-                <select id="doc-product" class="form-select">
-                    ${AppData.products.map(p => `<option value="${p.id}">${p.name} - ${formatCurrency(p.price)}</option>`).join('')}
+
+            <!-- Şartlar -->
+            <div class="form-group">
+                <label class="form-label">Para Birimi</label>
+                <select id="doc-currency" class="form-select">
+                    <option value="TRY">TRY (₺)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
                 </select>
             </div>
+            <div class="form-group">
+                <label class="form-label">Geçerlilik Süresi</label>
+                <input id="doc-validity" type="text" class="form-input" value="15 Gün">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Teslimat Şartı</label>
+                <select id="doc-delivery" class="form-select">
+                    <option value="DAP - Hastane Teslim (Yerinde Kurulum)">DAP - Hastane Teslim (Yerinde Kurulum)</option>
+                    <option value="EXW - Fabrika Teslim">EXW - Fabrika Teslim</option>
+                    <option value="CIP - Taşıma Ödenmiş">CIP - Taşıma Ödenmiş</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Ödeme Şartı</label>
+                <input id="doc-payment" type="text" class="form-input" value="%50 Siparişte Peşin, %50 Teslimatta">
+            </div>
+
+            <!-- Cihazlar / İtemler -->
+            <div class="form-group" style="grid-column: span 2;">
+                <div class="flex-between mb-1">
+                    <label class="form-label">Teklif Kalemleri (Ürünler)</label>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addProformaItemRow()">+ Kalem Ekle</button>
+                </div>
+                <div id="proforma-items-container" style="display:flex; flex-direction:column; gap:8px;">
+                    <!-- Defaults generated by JS -->
+                </div>
+            </div>
+            <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label">Notlar / Açıklamalar</label>
+                <textarea id="doc-notes" class="form-textarea" rows="2" placeholder="Kurulum firmamızca yapılacaktır..."></textarea>
+            </div>
         </form>
-        <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" onclick="generateAndPrintPDF('${type}')">PDF Oluştur ve Yazdır</button></div>
+        <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" style="padding: 14px; font-size: 1.1rem;" onclick="generateAndPrintPDF('${type}')">PDF Oluştur ve Yazdır</button></div>
         `;
+        
+        // Add at least one row immediately
+        setTimeout(() => addProformaItemRow(), 50);
     }
     else if (type === 'email-campaign') {
         title.innerText = 'Yeni Mail Kampanyası / Göndergesi';
@@ -974,31 +1296,31 @@ function openModal(type) {
     else if (type === 'income') {
         title.innerText = 'Gelir Ekle';
         body.innerHTML = `
-        < form id = "form-income" class="grid grid-2 gap-2" >
+        <form id="form-income" class="grid grid-2 gap-2">
                 <div class="form-group"><label class="form-label">Kategori</label><select id="income-category" class="form-select"><option>Satış</option><option>Yatırım</option></select></div>
                 <div class="form-group"><label class="form-label">Tutar</label><input id="income-amount" type="number" class="form-input"></div>
                 <div class="form-group"><label class="form-label">Tarih</label><input id="income-date" type="date" class="form-input"></div>
                 <div class="form-group" style="grid-column:span 2"><label class="form-label">Açıklama</label><input id="income-desc" type="text" class="form-input"></div>
-            </form >
+            </form>
         <div class="flex justify-end mt-2"><button class="btn btn-success w-100" onclick="handleFormSubmit('income')">Kaydet</button></div>
     `;
     }
     else if (type === 'expense') {
         title.innerText = 'Gider Ekle';
         body.innerHTML = `
-        < form id = "form-expense" class="grid grid-2 gap-2" >
+        <form id="form-expense" class="grid grid-2 gap-2">
                 <div class="form-group"><label class="form-label">Kategori</label><select id="expense-category" class="form-select"><option>Personel</option><option>Kira</option></select></div>
                 <div class="form-group"><label class="form-label">Tutar</label><input id="expense-amount" type="number" class="form-input"></div>
                 <div class="form-group"><label class="form-label">Tarih</label><input id="expense-date" type="date" class="form-input"></div>
                 <div class="form-group" style="grid-column:span 2"><label class="form-label">Açıklama</label><input id="expense-desc" type="text" class="form-input"></div>
-            </form >
+            </form>
         <div class="flex justify-end mt-2"><button class="btn btn-danger w-100" onclick="handleFormSubmit('expense')">Kaydet</button></div>
     `;
     }
     else if (type === 'service-form') {
         title.innerText = 'Servis Formu';
         body.innerHTML = `
-        < form id = "form-service" class="grid grid-2 gap-2" >
+        <form id="form-service" class="grid grid-2 gap-2">
                 <div class="form-group"><label class="form-label">Müşteri</label><select id="srv-customer" class="form-select">${AppData.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">Cihaz</label><select id="srv-product" class="form-select">${AppData.products.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
                 <div class="form-group"><label class="form-label">İşlem</label><select id="srv-type" class="form-select"><option>Bakım</option><option>Arıza</option></select></div>
@@ -1010,19 +1332,19 @@ function openModal(type) {
                         [İmza İçin Tıkla]
                     </div>
                 </div>
-            </form >
+            </form>
         <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" onclick="handleFormSubmit('service')">Kaydet</button></div>
     `;
     }
     else if (type === 'hr-add') {
         title.innerText = 'Personel Ekle';
         body.innerHTML = `
-        < form id = "form-hr" class="grid grid-2 gap-2" >
+        <form id="form-hr" class="grid grid-2 gap-2">
                 <div class="form-group"><label class="form-label">Ad Soyad</label><input id="hr-name" type="text" class="form-input"></div>
                 <div class="form-group"><label class="form-label">Departman</label><select id="hr-dept" class="form-select"><option>Yazılım</option><option>Satış</option><option>Ar-Ge</option><option>HR</option><option>Finans</option></select></div>
                 <div class="form-group"><label class="form-label">Durum</label><select id="hr-status" class="form-select"><option>Aktif</option><option>İzinli</option></select></div>
                 <div class="form-group"><label class="form-label">Pozisyon</label><input id="hr-pos" type="text" class="form-input"></div>
-            </form >
+            </form>
         <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" onclick="handleFormSubmit('hr')">Kaydet</button></div>
     `;
     }
@@ -1050,6 +1372,94 @@ function openModal(type) {
         <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" onclick="handleFormSubmit('product')">Ürün Ekle</button></div>
         `;
     }
+    else if (type === 'email-campaign') {
+        title.innerText = 'Yeni Mail Kampanyası';
+        body.innerHTML = `
+        <form id="form-email-campaign" class="grid grid-2 gap-2">
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">Kampanya Adı</label><input type="text" class="form-input" placeholder="Örn: Neuro One V5 Lansman"></div>
+            <div class="form-group"><label class="form-label">Hedef Kitle</label><select class="form-select"><option>Tüm Bayiler</option><option>Özel Hastaneler Başhekimlik</option><option>Nörologlar Kongresi</option></select></div>
+            <div class="form-group"><label class="form-label">Tarih</label><input type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">Mail Konusu</label><input type="text" class="form-input" placeholder="Biyosera ile yeni teknolojiye merhaba deyin."></div>
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">İçerik</label><textarea class="form-input" rows="3" placeholder="Gülümse... Yeni bir dönem başlıyor."></textarea></div>
+        </form>
+        <div class="flex justify-end mt-2"><button class="btn btn-warning w-100" onclick="closeModal(); alert('Kampanya başlatıldı. Gönderim sırasına alındı.')">Gönderimi Başlat</button></div>
+        `;
+    }
+    else if (type === 'travel') {
+        title.innerText = 'Yeni Seyahat / Görev Planla';
+        body.innerHTML = `
+        <form id="form-travel" class="grid grid-2 gap-2">
+            <div class="form-group"><label class="form-label">Personel (Kim?)</label><select class="form-select">${AppData.employees.map(e => `<option>${e.name}</option>`).join('')}</select></div>
+            <div class="form-group"><label class="form-label">Araç Plakası / Ulaşım</label><input type="text" class="form-input" placeholder="Örn: 34 BSY 145 veya THY Uçuş"></div>
+            
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">Kurum (Nereye?)</label><input type="text" class="form-input" placeholder="Örn: Kayseri Şehir Hastanesi"></div>
+            
+            <div class="form-group"><label class="form-label">Başlangıç Tarihi</label><input type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+            <div class="form-group"><label class="form-label">Süre (Gün)</label><input type="number" class="form-input" placeholder="Örn: 3" value="1"></div>
+            
+            <div class="form-group"><label class="form-label">Görev Özeti</label><input type="text" class="form-input" placeholder="Örn: Neuro One Demoları"></div>
+            <div class="form-group"><label class="form-label">İş Önceliği</label><select class="form-select"><option>Kritik</option><option>Yüksek</option><option>Normal</option><option>Düşük</option></select></div>
+        </form>
+        <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" onclick="closeModal(); showToast('Seyahat planı sisteme işlendi.', 'success'); loadPage('seyahat');">Seyahat Planla</button></div>
+        `;
+    }
+    else if (type === 'project') {
+        title.innerText = 'Yeni Proje Yönetimi';
+        body.innerHTML = `
+        <form class="grid grid-2 gap-2">
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">Proje Adı</label><input id="prj-name" type="text" class="form-input" placeholder="Örn: Şehir Hastaneleri Entegrasyonu"></div>
+            <div class="form-group"><label class="form-label">Proje Yöneticisi</label><select id="prj-manager" class="form-select">${AppData.employees.map(e => `<option>${e.name}</option>`).join('')}</select></div>
+            <div class="form-group"><label class="form-label">Durum</label><select id="prj-status" class="form-select"><option>Aktif</option><option>Beklemede</option><option>Tamamlandı</option></select></div>
+            <div class="form-group"><label class="form-label">Başlangıç Tarihi</label><input id="prj-start" type="date" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Bitiş Tarihi</label><input id="prj-end" type="date" class="form-input"></div>
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">İlerleme Durumu (%)</label><input id="prj-progress" type="range" min="0" max="100" value="0" class="form-input" oninput="this.nextElementSibling.innerText = this.value + '%'"> <span class="bold">0%</span></div>
+        </form>
+        <div class="flex justify-end mt-2"><button class="btn btn-primary w-100" onclick="handleFormSubmit('project')">Projeyi Kaydet</button></div>
+        `;
+    }
+    else if (type === 'check') {
+        title.innerText = 'Evrak (Çek / Senet) Girişi';
+        body.innerHTML = `
+        <form class="grid grid-2 gap-2">
+            <div class="form-group"><label class="form-label">Evrak Türü</label><select id="chk-type" class="form-select"><option>Müşteri Çeki</option><option>Banka Çeki</option><option>Senet</option></select></div>
+            <div class="form-group"><label class="form-label">Kime Ait / Keşideci</label><input id="chk-owner" type="text" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Tutar (₺)</label><input id="chk-amount" type="number" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Vade Tarihi</label><input id="chk-due" type="date" class="form-input"></div>
+        </form>
+        <div class="flex justify-end mt-2"><button class="btn btn-success w-100" onclick="handleFormSubmit('check')">Evrağı Kaydet</button></div>
+        `;
+    }
+    else if (type === 'purchase') {
+        title.innerText = 'Yeni Satın Alma / Sipariş';
+        body.innerHTML = `
+        <form class="grid grid-2 gap-2">
+            <div class="form-group"><label class="form-label">Tedarikçi Firma</label><input id="pur-supplier" type="text" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Ürün / Alım Kodu</label><input id="pur-code" type="text" class="form-input" placeholder="Örn: STK-9921"></div>
+            <div class="form-group"><label class="form-label">Kategori</label><select id="pur-type" class="form-select"><option>Hammadde</option><option>Cihaz / İthalat</option><option>Sarf Malzeme</option></select></div>
+            <div class="form-group"><label class="form-label">Tutar (₺)</label><input id="pur-amount" type="number" class="form-input"></div>
+            <div class="form-group" style="grid-column: span 2"><label class="form-label">Tahmini Giriş / Teslim Tarihi</label><input id="pur-date" type="date" class="form-input"></div>
+        </form>
+        <div class="flex justify-end mt-2"><button class="btn btn-warning w-100" onclick="handleFormSubmit('purchase')">Siparişi Oluştur</button></div>
+        `;
+    }
+}
+
+// --- MODAL UTILS ---
+function addProformaItemRow() {
+    const container = document.getElementById('proforma-items-container');
+    if (!container) return;
+    const row = document.createElement('div');
+    row.className = 'flex gap-1 proforma-item-row';
+    row.style.alignItems = 'center';
+    row.innerHTML = `
+        <select class="form-select doc-item-product" style="flex: 3;">
+            ${AppData.products.map(p => `<option value="${p.id}" data-price="${p.price}">${p.name} - ${formatCurrency(p.price)}</option>`).join('')}
+        </select>
+        <input type="number" class="form-input doc-item-qty" placeholder="Adet" value="1" min="1" style="flex: 1;">
+        <input type="number" class="form-input doc-item-discount" placeholder="İskonto %" value="0" min="0" max="100" style="flex: 1;">
+        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()" style="padding: 10px; flex: 0 0 40px;">X</button>
+    `;
+    container.appendChild(row);
 }
 
 function closeModal() {
@@ -1059,70 +1469,183 @@ function closeModal() {
 
 // --- PDF GENERATOR CORE ---
 function generateAndPrintPDF(type) {
+    // 1. Core Fields
     const customerId = parseInt(document.getElementById('doc-customer').value);
-    const docNo = document.getElementById('doc-no').value;
-    const date = document.getElementById('doc-date').value;
-    const productId = parseInt(document.getElementById('doc-product').value);
-
     const customer = AppData.customers.find(c => c.id === customerId);
-    const product = AppData.products.find(p => p.id === productId);
+    
+    // Fallbacks just in case it's an older form or missing
+    const docNo = document.getElementById('doc-no') ? document.getElementById('doc-no').value : 'DOC-001';
+    const date = document.getElementById('doc-date') ? document.getElementById('doc-date').value : new Date().toISOString().split('T')[0];
+    
+    // Extended Form Fields (only exist if proforma/invoice/sartname modal is used)
+    const attention = document.getElementById('doc-attention') ? document.getElementById('doc-attention').value : '';
+    const currency = document.getElementById('doc-currency') ? document.getElementById('doc-currency').value : 'TRY';
+    const validity = document.getElementById('doc-validity') ? document.getElementById('doc-validity').value : '15 Gün';
+    const delivery = document.getElementById('doc-delivery') ? document.getElementById('doc-delivery').value : 'DAP - Hastane Teslim';
+    const payment = document.getElementById('doc-payment') ? document.getElementById('doc-payment').value : '%100 Peşin';
+    const notes = document.getElementById('doc-notes') ? document.getElementById('doc-notes').value : '';
+
+    const currencySymbol = currency === 'USD' ? '$' : (currency === 'EUR' ? '€' : '₺');
+    const currFormat = (val) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: currency }).format(val);
 
     let title = '';
     let content = '';
 
-    if (type === 'doc-invoice') {
-        title = 'TİCARİ FATURA';
+    // 2. Extract Items from DOM
+    let itemsHTML = '';
+    let subTotal = 0;
+    
+    // Check if we have dynamic rows
+    const itemRows = document.querySelectorAll('.proforma-item-row');
+    if (itemRows.length > 0) {
+        let index = 1;
+        itemRows.forEach(row => {
+            const selectEl = row.querySelector('.doc-item-product');
+            const qty = parseFloat(row.querySelector('.doc-item-qty').value) || 1;
+            const discountPct = parseFloat(row.querySelector('.doc-item-discount').value) || 0;
+            
+            const prodName = selectEl.options[selectEl.selectedIndex].text.split(' - ')[0];
+            const price = parseFloat(selectEl.options[selectEl.selectedIndex].dataset.price) || 0;
+            
+            const gross = price * qty;
+            const discountAmount = gross * (discountPct / 100);
+            const net = gross - discountAmount;
+            subTotal += net;
+
+            itemsHTML += `
+                <tr>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:center;">${index++}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; font-weight:600; color:#222;">${prodName}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:center;">${qty}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:right;">${currFormat(price)}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:right;">%${discountPct}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:right; font-weight:bold;">${currFormat(net)}</td>
+                </tr>
+            `;
+        });
+    } else {
+        // Fallback for single product (legacy)
+        const prodId = document.getElementById('doc-product') ? parseInt(document.getElementById('doc-product').value) : null;
+        if (prodId) {
+            const product = AppData.products.find(p => p.id === prodId);
+            if (product) {
+                subTotal = product.price;
+                itemsHTML = `
+                <tr>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:center;">1</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; font-weight:600; color:#222;">${product.name}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:center;">1</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:right;">${currFormat(product.price)}</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:right;">%0</td>
+                    <td style="padding:12px; border-bottom:1px solid #eaeaea; text-align:right; font-weight:bold;">${currFormat(product.price)}</td>
+                </tr>`;
+            }
+        }
+    }
+
+    const tax = subTotal * 0.20; // 20% KDV
+    const grandTotal = subTotal + tax;
+
+    if (type === 'doc-invoice' || type === 'proforma') {
+        title = type === 'doc-invoice' ? 'TİCARİ FATURA (COMMERCIAL INVOICE)' : 'PROFORMA FATURA (QUOTATION)';
         content = `
-            <table style="width:100%; margin-top:20px; border-collapse: collapse;">
-                <tr><td colspan="2" style="background:#eee; padding:10px; font-weight:bold;">MÜŞTERİ BİLGİLERİ</td></tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #ddd; width:150px;"><strong>Firma Adı:</strong></td><td style="padding:10px; border-bottom:1px solid #ddd;">${customer.name}</td></tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #ddd;"><strong>Yetkili:</strong></td><td style="padding:10px; border-bottom:1px solid #ddd;">${customer.contact} (${customer.phone || '-'})</td></tr>
-                <tr><td style="padding:10px; border-bottom:1px solid #ddd;"><strong>Şehir/Tip:</strong></td><td style="padding:10px; border-bottom:1px solid #ddd;">${customer.city} / ${customer.type}</td></tr>
+            <table style="width:100%; margin-bottom:30px; border-collapse: collapse; font-size:0.95rem;">
+                <tr>
+                    <td style="width:55%; vertical-align:top;">
+                        <div style="background:#f8f9fa; padding:15px; border-radius:8px; border:1px solid #eaeaea;">
+                            <strong style="color:#0b1e36; font-size:1.1rem;">Sayın / To:</strong><br>
+                            <span style="font-size:1.1rem; font-weight:bold; display:block; margin-top:5px;">${customer.name}</span>
+                            <span style="color:#555;">İlgili: ${attention || customer.contact}</span><br>
+                            <span style="color:#555;">${customer.city} / ${customer.type}</span><br>
+                            ${customer.phone ? `<span style="color:#555;">Tel: ${customer.phone}</span>` : ''}
+                        </div>
+                    </td>
+                    <td style="width:5%;"></td>
+                    <td style="width:40%; vertical-align:top;">
+                        <table style="width:100%; border-collapse:collapse; background:#f8f9fa; border-radius:8px; border:1px solid #eaeaea; overflow:hidden;">
+                            <tr><td style="padding:8px 15px; border-bottom:1px solid #eaeaea; color:#555;">Tarih / Date:</td><td style="padding:8px 15px; border-bottom:1px solid #eaeaea; font-weight:bold; text-align:right;">${formatDate(date)}</td></tr>
+                            <tr><td style="padding:8px 15px; border-bottom:1px solid #eaeaea; color:#555;">Belge No / Ref:</td><td style="padding:8px 15px; border-bottom:1px solid #eaeaea; font-weight:bold; text-align:right;">${docNo}</td></tr>
+                            <tr><td style="padding:8px 15px; border-bottom:1px solid #eaeaea; color:#555;">Geçerlilik / Validity:</td><td style="padding:8px 15px; border-bottom:1px solid #eaeaea; font-weight:bold; text-align:right;">${validity}</td></tr>
+                            <tr><td style="padding:8px 15px; color:#555;">Para Birimi / Curr:</td><td style="padding:8px 15px; font-weight:bold; text-align:right; color:#0b1e36;">${currency}</td></tr>
+                        </table>
+                    </td>
+                </tr>
             </table>
             
-            <table style="width:100%; margin-top:30px; border-collapse: collapse; text-align: left;">
+            <p style="margin-bottom:20px; font-size:1rem;">Talebiniz üzerine hazırlanan ürün ve cihaz fiyat teklifimiz aşağıda onayınıza sunulmuştur.</p>
+            
+            <!-- Items Table -->
+            <table style="width:100%; border-collapse: collapse; text-align: left; margin-bottom:20px; font-size:0.95rem;">
                 <thead>
                     <tr style="background:#0b1e36; color:white;">
-                        <th style="padding:15px;">Ürün Açıklaması</th>
-                        <th style="padding:15px;">Miktar</th>
-                        <th style="padding:15px;">Birim Fiyat</th>
-                        <th style="padding:15px;">Toplam</th>
+                        <th style="padding:12px; text-align:center; width:5%;">#</th>
+                        <th style="padding:12px; width:45%;">Ürün / Hizmet Açıklaması</th>
+                        <th style="padding:12px; text-align:center; width:10%;">Miktar</th>
+                        <th style="padding:12px; text-align:right; width:15%;">Birim Fiyat</th>
+                        <th style="padding:12px; text-align:right; width:10%;">İsk.</th>
+                        <th style="padding:12px; text-align:right; width:15%;">Net Tutar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td style="padding:15px; border-bottom:1px solid #eee;">${product.name}</td>
-                        <td style="padding:15px; border-bottom:1px solid #eee;">1 Adet</td>
-                        <td style="padding:15px; border-bottom:1px solid #eee;">${formatCurrency(product.price)}</td>
-                        <td style="padding:15px; border-bottom:1px solid #eee;"><strong>${formatCurrency(product.price)}</strong></td>
-                    </tr>
+                    ${itemsHTML}
                 </tbody>
             </table>
-            <div style="text-align:right; margin-top:20px; font-size:1.2rem; font-weight:bold;">Genel Toplam: ${formatCurrency(product.price)}</div>
-        `;
-    } else if (type === 'proforma') {
-        title = 'PROFORMA FATURA TEKLİFİ';
-        content = `
-            <p style="margin-bottom:30px; font-size:1.1rem;">Sayın <strong>${customer.name}</strong> yetkilisi <strong>${customer.contact}</strong>,<br>Talebiniz üzerine hazırlanan cihaz fiyat teklifimiz aşağıda bilgilerinize sunulmuştur.</p>
-            <table style="width:100%; margin-top:10px; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr style="background:#0984e3; color:white;">
-                        <th style="padding:15px;">Cihaz / Model</th>
-                        <th style="padding:15px;">Adet</th>
-                        <th style="padding:15px;">Liste Fiyatı</th>
-                    </tr>
-                </thead>
-                <tbody>
+            
+            <!-- Totals Calculation -->
+            <div style="display:flex; justify-content:flex-end;">
+                <table style="width:40%; border-collapse: collapse; font-size:1rem;">
                     <tr>
-                        <td style="padding:15px; border-bottom:1px solid #eee; font-weight:bold;">${product.name}</td>
-                        <td style="padding:15px; border-bottom:1px solid #eee;">1 Set</td>
-                        <td style="padding:15px; border-bottom:1px solid #eee; color:#d63031; font-size:1.1rem;"><strong>${formatCurrency(product.price)}</strong></td>
+                        <td style="padding:8px 15px; color:#555; border-bottom:1px solid #eaeaea;">Ara Toplam:</td>
+                        <td style="padding:8px 15px; font-weight:bold; text-align:right; border-bottom:1px solid #eaeaea;">${currFormat(subTotal)}</td>
                     </tr>
-                </tbody>
+                    <tr>
+                        <td style="padding:8px 15px; color:#555; border-bottom:1px solid #eaeaea;">KDV (%20):</td>
+                        <td style="padding:8px 15px; text-align:right; border-bottom:1px solid #eaeaea;">${currFormat(tax)}</td>
+                    </tr>
+                    <tr style="background:#f8f9fa;">
+                        <td style="padding:12px 15px; font-weight:bold; color:#0b1e36; font-size:1.2rem; border-bottom:2px solid #0b1e36;">GENEL TOPLAM:</td>
+                        <td style="padding:12px 15px; font-weight:bold; text-align:right; color:#d63031; font-size:1.2rem; border-bottom:2px solid #0b1e36;">${currFormat(grandTotal)}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Terms & Conditions -->
+            <div style="margin-top:40px; font-size:0.85rem; border-top:1px solid #eaeaea; padding-top:20px;">
+                <h4 style="margin:0 0 10px 0; color:#0b1e36;">TİCARİ ŞARTLAR (TERMS & CONDITIONS)</h4>
+                <table style="width:100%; border-collapse: collapse;">
+                    <tr><td style="width:25%; padding:4px 0; font-weight:bold; color:#555;">Teslimat Şartı:</td><td style="padding:4px 0;">${delivery}</td></tr>
+                    <tr><td style="width:25%; padding:4px 0; font-weight:bold; color:#555;">Ödeme Şartı:</td><td style="padding:4px 0;">${payment}</td></tr>
+                    <tr><td style="width:25%; padding:4px 0; font-weight:bold; color:#555;">Garanti Süresi:</td><td style="padding:4px 0;">Kurulum tarihinden itibaren 2 Yıl (Distribütör Garantisi)</td></tr>
+                    ${notes ? `<tr><td style="width:25%; padding:4px 0; font-weight:bold; color:#555;">Ek Notlar:</td><td style="padding:4px 0; color:#d63031; font-weight:bold;">${notes}</td></tr>` : ''}
+                </table>
+            </div>
+            
+            <!-- Bank & Signature Block -->
+            <table style="width:100%; margin-top:30px; font-size:0.85rem;">
+                <tr>
+                    <td style="width:50%; vertical-align:top; border:1px solid #eaeaea; padding:15px; background:#fafafa; border-radius:6px;">
+                        <strong style="color:#0b1e36;">BANKA HESAP BİLGİLERİ (BANK DETAILS)</strong><br><br>
+                        <strong>Alıcı Ünvan:</strong> BİYOSERA MEDİKAL SAN.TİC.LTD.ŞTİ.<br>
+                        <strong>Banka:</strong> Garanti BBVA - Ostim Şb.<br>
+                        <table style="width:100%; margin-top:5px; border-collapse: collapse;">
+                            <tr><td style="color:#555; width:30%;">IBAN (TRY):</td><td><strong>TR12 3456 7890 0000 0000 00</strong></td></tr>
+                            <tr><td style="color:#555;">IBAN (USD):</td><td><strong>TR12 3456 7890 0000 0001 00</strong></td></tr>
+                            <tr><td style="color:#555;">IBAN (EUR):</td><td><strong>TR12 3456 7890 0000 0002 00</strong></td></tr>
+                        </table>
+                    </td>
+                    <td style="width:5%;"></td>
+                    <td style="width:45%; vertical-align:top; text-align:center; padding-top:20px;">
+                        <strong>BİYOSERA MEDİKAL</strong><br>
+                        <span style="color:#777;">Eren Çelikten - Genel Müdür</span>
+                        <div style="margin-top:40px; border-bottom:1px solid #ccc; width:60%; margin-left:auto; margin-right:auto;"></div>
+                        <span style="font-size:0.75rem; color:#999; display:block; margin-top:5px;">(Yetkili Kaşe ve İmza / Stamp & Signature)</span>
+                    </td>
+                </tr>
             </table>
-            <p style="margin-top:40px; font-size:0.9rem; color:#555;"><i>* Bu teklif belgesi ${formatDate(date)} tarihinden itibaren 15 gün süreyle geçerlidir. Cihaz kurulumu ve eğitim firmamızca ücretsiz sağlanacaktır.</i></p>
         `;
     } else if (type === 'doc-sartname') {
+        const prodId = document.getElementById('doc-product') ? parseInt(document.getElementById('doc-product').value) : null;
+        const product = AppData.products.find(p => p.id === prodId) || {name: 'Cihaz'};
         title = 'TEKNİK ŞARTNAME & ÜRÜN BEYANI';
         content = `
             <h3 style="text-align:center; margin-bottom: 20px;">${product.name} - TEKNİK ÖZELLİKLERİ</h3>
@@ -1145,21 +1668,22 @@ function generateAndPrintPDF(type) {
 
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
+        <!DOCTYPE html>
         <html>
         <head>
+            <meta charset="utf-8">
             <title>${title} - ${docNo}</title>
             <style>
-                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 2cm 2cm 0 2cm; color: #222; background: white; }
-                .pdf-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0b1e36; padding-bottom: 20px; margin-bottom: 30px; }
-                .pdf-logo { max-height: 70px; }
+                body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 2cm; color: #333; background: white; -webkit-print-color-adjust: exact; }
+                .pdf-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 4px solid #0b1e36; padding-bottom: 15px; margin-bottom: 30px; }
+                .pdf-logo { max-height: 55px; }
                 .pdf-company-info { text-align: right; font-size: 0.85rem; color: #555; line-height: 1.4; }
-                .pdf-title-box { text-align: center; margin-bottom: 40px; }
+                .pdf-title-box { text-align: center; margin-bottom: 30px; }
                 .pdf-title-box h1 { margin: 0; color: #0b1e36; font-size: 24px; letter-spacing: 1px;}
-                .pdf-title-box p { margin: 5px 0 0 0; color: #777; font-size: 14px; }
-                .pdf-footer { position: fixed; bottom: 1cm; left: 2cm; right: 2cm; text-align: center; font-size: 0.8rem; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
+                .pdf-footer { position: fixed; bottom: 1cm; left: 2cm; right: 2cm; text-align: center; font-size: 0.75rem; color: #aaa; border-top: 1px solid #eaeaea; padding-top: 10px; }
                 @media print {
                     @page { margin: 0; size: A4; }
-                    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    body { padding: 1.5cm; }
                 }
             </style>
         </head>
@@ -1167,15 +1691,17 @@ function generateAndPrintPDF(type) {
             <div class="pdf-header">
                 <div><img src="assets/logo.png" class="pdf-logo" alt="Biyosera" onerror="this.src='../assets/logo.png'"></div>
                 <div class="pdf-company-info">
-                    <strong>BİYOSERA MEDİKAL SAN. VE TİC. LTD. ŞTİ.</strong><br>
+                    <strong style="color:#0b1e36; font-size:0.95rem;">BİYOSERA MEDİKAL SAN. VE TİC. LTD. ŞTİ.</strong><br>
                     İvedik OSB Mah. 1354 Cad. No: 114<br>
                     Yenimahalle / ANKARA<br>
-                    Tel: +90 312 395 00 00 | E-posta: info@biyosera.com
+                    Tel: +90 312 395 00 00 | E-posta: info@biyosera.com<br>
+                    VD: Ostim / VNo: 1770000000
                 </div>
             </div>
             
             <div class="pdf-title-box">
                 <h1>${title}</h1>
+
                 <p>Belge Kayıt No: ${docNo} &nbsp;|&nbsp; Düzenleme Tarihi: ${formatDate(date)}</p>
             </div>
             
@@ -1250,7 +1776,7 @@ function handleFormSubmit(type) {
             amount: amount,
             dueDate: date,
             status: 'Tahsil Edildi',
-            ref: category + '-' + Date.now(),
+            ref: generateRef('GEL'),
             desc: desc
         });
 
@@ -1275,7 +1801,8 @@ function handleFormSubmit(type) {
             category: category,
             amount: amount,
             date: date,
-            desc: desc
+            desc: desc,
+            ref: generateRef('GID')
         });
 
         // Ayrıca payables'a da ekle
@@ -1285,7 +1812,8 @@ function handleFormSubmit(type) {
             amount: amount,
             dueDate: date,
             status: 'Ödendi',
-            type: category
+            type: category,
+            ref: generateRef('MAS')
         });
 
         saveData();
@@ -1345,6 +1873,78 @@ function handleFormSubmit(type) {
         closeModal();
         showToast('Personel eklendi: ' + name, 'success');
         loadPage('personel');
+    }
+    else if (type === 'project') {
+        const name = document.getElementById('prj-name').value;
+        const manager = document.getElementById('prj-manager').value;
+        const start = document.getElementById('prj-start').value;
+        const end = document.getElementById('prj-end').value;
+        const status = document.getElementById('prj-status').value;
+        const progress = document.getElementById('prj-progress').value;
+
+        if (!name) return alert('Proje adı giriniz.');
+
+        if (!AppData.projects) AppData.projects = [];
+        AppData.projects.push({
+            id: Date.now(),
+            name: name,
+            manager: manager,
+            startDate: start,
+            endDate: end,
+            status: status,
+            progress: progress,
+            ref: generateRef('PRO')
+        });
+        saveData();
+        closeModal();
+        showToast('Proje başarıyla kaydedildi.', 'success');
+        loadPage('projeler');
+    }
+    else if (type === 'check') {
+        const checkType = document.getElementById('chk-type').value;
+        const owner = document.getElementById('chk-owner').value;
+        const amount = parseFloat(document.getElementById('chk-amount').value) || 0;
+        const dueDate = document.getElementById('chk-due').value;
+
+        if (!amount || !owner) return alert('Lütfen bilgileri doldurunuz.');
+
+        if (!AppData.checks) AppData.checks = [];
+        AppData.checks.push({
+            id: Date.now(),
+            type: checkType,
+            owner: owner,
+            amount: amount,
+            dueDate: dueDate,
+            status: 'Portföyde',
+            ref: generateRef('EVR')
+        });
+        saveData();
+        closeModal();
+        showToast('Evrak kaydedildi.', 'success');
+        loadPage('cek-senet');
+    }
+    else if (type === 'purchase') {
+        const supplier = document.getElementById('pur-supplier').value;
+        const prodCode = document.getElementById('pur-code').value;
+        const amount = parseFloat(document.getElementById('pur-amount').value) || 0;
+        const typeCat = document.getElementById('pur-type').value;
+        const inDate = document.getElementById('pur-date').value;
+
+        if (!supplier || !amount) return alert('Lütfen bilgileri doldurunuz.');
+
+        AppData.payables.push({
+            id: Date.now(),
+            supplier: supplier,
+            amount: amount,
+            dueDate: inDate,
+            status: 'Bekliyor',
+            type: typeCat,
+            ref: generateRef('ALM')
+        });
+        saveData();
+        closeModal();
+        showToast('Sipariş kaydedildi.', 'success');
+        loadPage('satin-alma');
     }
     else if (type === 'customer') {
         const name = document.getElementById('cust-name').value;
@@ -1481,7 +2081,7 @@ function deleteItem(type, id) {
             break;
         case 'product':
             AppData.products = AppData.products.filter(p => p.id !== id);
-            loadPage('uretim');
+            loadPage('stok');
             break;
         case 'sale':
             AppData.sales = AppData.sales.filter(s => s.id !== id);
@@ -1497,11 +2097,27 @@ function deleteItem(type, id) {
             break;
         case 'receivable':
             AppData.receivables = AppData.receivables.filter(r => r.id !== id);
-            loadPage('faturalar');
+            loadPage('finansal');
             break;
         case 'payable':
             AppData.payables = AppData.payables.filter(p => p.id !== id);
             loadPage('satin-alma');
+            break;
+        case 'travel':
+            AppData.travels = AppData.travels.filter(t => t.id !== id);
+            loadPage('seyahat');
+            break;
+        case 'account':
+            AppData.accounts = AppData.accounts.filter(a => a.id !== id);
+            loadPage('gelir-gider');
+            break;
+        case 'project':
+            AppData.projects = AppData.projects.filter(p => p.id !== id);
+            loadPage('projeler');
+            break;
+        case 'check':
+            AppData.checks = AppData.checks.filter(c => c.id !== id);
+            loadPage('cek-senet');
             break;
     }
 
@@ -1514,11 +2130,11 @@ function toggleMobileMenu() {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
 
-    sidebar.classList.toggle('active');
+    sidebar.classList.toggle('open');
     overlay.classList.toggle('active');
 
     // Prevent body scroll when menu is open
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
 }
 
 // Close mobile menu when clicking a nav item
@@ -1699,7 +2315,7 @@ function renderPurchasing() {
                 <h2>Satın Alma & Tedarik</h2>
                 <p class="text-muted">Hammadde, cihaz ve medikal malzeme siparişleri</p>
             </div>
-            <button class="btn btn-warning" onclick="alert('Tedarikçi sipariş formu')">
+            <button class="btn btn-warning" onclick="openModal('purchase')">
                 ${Icons.plus} Yeni Sipariş
             </button>
         </div>
@@ -1714,7 +2330,7 @@ function renderPurchasing() {
             <div class="card-header"><h3>Tedarikçi Listesi ve Borçlar</h3></div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Tedarikçi</th><th>Kategori</th><th>Borç</th><th>Vade</th><th>Kalan Gün</th><th>Durum</th></tr></thead>
+                    <thead><tr><th>Tedarikçi</th><th>Kategori</th><th>Borç</th><th>Vade</th><th>Kalan Gün</th><th>Durum</th><th>İşlem</th></tr></thead>
                     <tbody>
                         ${AppData.payables.map(p => `
                             <tr>
@@ -1724,6 +2340,9 @@ function renderPurchasing() {
                                 <td>${formatDate(p.dueDate)}</td>
                                 <td>${getDaysRemaining(p.dueDate)}</td>
                                 <td><span class="badge badge-warning">${p.status}</span></td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('payable', ${p.id})">Sil</button>
+                                </td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -1844,20 +2463,63 @@ function renderProjects() {
     return `
         <div class="flex-between mb-2">
             <div><h2>Proje Yönetimi</h2><p class="text-muted">Devam eden Ar-Ge ve kurulum projeleri</p></div>
-            <button class="btn btn-primary">${Icons.plus} Yeni Proje</button>
+            <button class="btn btn-primary" onclick="openModal('project')">${Icons.plus} Yeni Proje</button>
         </div>
         <div class="grid grid-2">
+            ${AppData.projects.map(p => `
             <div class="card">
-                <div class="card-header"><h3>Neuro One V3 Geliştirme</h3><span class="badge badge-info">%65 Tamamlandı</span></div>
-                <p class="text-muted mb-1">Yeni nesil beyin-bilgisayar arayüzü geliştirmesi.</p>
-                <div style="background:#374151; height:8px; border-radius:4px; overflow:hidden;"><div style="background:var(--primary); width:65%; height:100%;"></div></div>
-                <div class="mt-2 text-right"><span class="text-muted">Bitiş: 15.03.2026</span></div>
+                <div class="card-header">
+                    <h3>${p.name}</h3>
+                    <span class="badge badge-${p.progress >= 100 ? 'success' : (p.progress > 50 ? 'info' : 'warning')}">%${p.progress} Tamamlandı</span>
+                </div>
+                <p class="text-muted mb-1">Yönetici: ${p.lead || p.manager}</p>
+                <div style="background:#374151; height:8px; border-radius:4px; overflow:hidden;">
+                    <div style="background:var(--${p.progress >= 100 ? 'success' : 'primary'}); width:${p.progress}%; height:100%;"></div>
+                </div>
+                <div class="mt-2 flex-between">
+                    <span class="badge badge-secondary" style="background:rgba(255,255,255,0.05);">${p.ref || generateRef('PRO')}</span>
+                    <div class="flex gap-1" style="align-items: center;">
+                        <span class="text-muted" style="font-size: 0.85rem;">Bitiş: ${formatDate(p.deadline || p.endDate || p.startDate)}</span>
+                        <button class="btn btn-sm btn-danger" style="margin-left: 10px;" onclick="deleteItem('project', ${p.id})">Sil</button>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-                <div class="card-header"><h3>Acıbadem Kurulum Entegrasyonu</h3><span class="badge badge-warning">%30 Tamamlandı</span></div>
-                <p class="text-muted mb-1">Hastane veri sistemleri ile tam entegrasyon.</p>
-                <div style="background:#374151; height:8px; border-radius:4px; overflow:hidden;"><div style="background:var(--warning); width:30%; height:100%;"></div></div>
-                <div class="mt-2 text-right"><span class="text-muted">Bitiş: 20.01.2026</span></div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// --- MODULE: APPROVALS (ONAY MERKEZİ) ---
+function renderApprovals() {
+    return `
+        <div class="flex-between mb-2">
+            <div><h2>Onay Merkezi</h2><p class="text-muted">Bekleyen masraf, proje ve satın alma onayları</p></div>
+        </div>
+        <div class="grid grid-3 mb-2">
+            <div class="d-card" style="border-top: 3px solid var(--danger);">
+                <div class="d-card-title">Masraf Formları</div>
+                <div class="d-value-large text-danger">4 <span style="font-size:1rem;font-weight:400;color:var(--text-muted);">Adet Tutar: ₺12.400</span></div>
+            </div>
+            <div class="d-card" style="border-top: 3px solid var(--warning);">
+                <div class="d-card-title">Satın Alma Talepleri</div>
+                <div class="d-value-large text-warning">2 <span style="font-size:1rem;font-weight:400;color:var(--text-muted);">Adet Onayda</span></div>
+            </div>
+            <div class="d-card" style="border-top: 3px solid var(--info);">
+                <div class="d-card-title">Proforma Düşük İskonto</div>
+                <div class="d-value-large text-info">1 <span style="font-size:1rem;font-weight:400;color:var(--text-muted);">Özel İskonto İstemi</span></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><h3>Bekleyen Onaylar Listesi</h3></div>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Tarih</th><th>Departman</th><th>İşlem Tipi</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead>
+                    <tbody>
+                        <tr><td>Bugün</td><td>Saha Satış</td><td>Masraf Talebi</td><td>Ahmet Yılmaz - Seyahat Gideri</td><td class="bold">₺4,500</td><td><button class="btn btn-success btn-sm">Onayla</button> <button class="btn btn-danger btn-sm">Reddet</button></td></tr>
+                        <tr><td>Dün</td><td>Tedarik</td><td>Satın Alma</td><td>Mekatronik Parça (Almanya)</td><td class="bold">€2,400</td><td><button class="btn btn-success btn-sm">Onayla</button> <button class="btn btn-danger btn-sm">Reddet</button></td></tr>
+                        <tr><td>20.12.2025</td><td>Operasyon</td><td>Ofis Gideri</td><td>Ortak Alan Sarf Malzeme</td><td class="bold">₺1,200</td><td><button class="btn btn-success btn-sm">Onayla</button> <button class="btn btn-danger btn-sm">Reddet</button></td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     `;
@@ -1868,7 +2530,9 @@ function renderMaintenance() {
     return `
         <div class="flex-between mb-2">
             <div><h2>Bakım & Onarım</h2><p class="text-muted">Teknik servis operasyonları ve periyodik bakımlar</p></div>
-            <div class="flex gap-1"><button class="btn btn-primary">Müdahale Ekle</button><button class="btn btn-secondary">Bakım Planı</button></div>
+            <div class="flex gap-1">
+                <button class="btn btn-primary" onclick="openModal('service-form')">Müdahale Ekle / Bakım Planla</button>
+            </div>
         </div>
         <div class="card">
             <div class="table-container">
@@ -1915,12 +2579,19 @@ function renderReports() {
 // --- MODULE: SETTINGS ---
 function renderSettings() {
     return `
-        <h2>Sistem Ayarları</h2>
+        <h2>Sistem Ayarları & Veritabanı Kontrolü</h2>
         <div class="card mt-1">
             <div class="form-group"><label class="form-label">Firma Adı</label><input type="text" class="form-input" value="BİYOSERA MEDİKAL TEKNOLOJİLERİ"></div>
             <div class="form-group"><label class="form-label">Varsayılan Para Birimi</label><select class="form-select"><option>TRY (₺)</option><option>USD ($)</option><option>EUR (€)</option></select></div>
             <div class="form-group"><label class="form-label">Tema</label><select class="form-select"><option>Koyu (Dark)</option><option>Açık (Light)</option></select></div>
-            <button class="btn btn-primary">Kaydet</button>
+            <button class="btn btn-primary mb-2">Ayarları Kaydet</button>
+            <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+            <h3 style="color:var(--danger); margin-bottom:10px;">Veritabanı (LocalStorage) Yönetimi</h3>
+            <p class="text-muted mb-2">Eğer bu platformu test yerine kendi verilerinizle gerçekten kullanmak istiyorsanız, önce her şeyi tamamen boşaltabilirsiniz.</p>
+            <div class="grid grid-2 gap-2">
+                <button class="btn btn-danger" style="padding:15px; font-weight:bold;" onclick="wipeAllData()">Tüm Verileri Sil (Bomboş Sisteme Geç)</button>
+                <button class="btn btn-warning" style="padding:15px; font-weight:bold;" onclick="resetToFactoryData()">Fabrika Test Verilerine Geri Dön</button>
+            </div>
         </div>
     `;
 }
@@ -1956,6 +2627,7 @@ function renderIncomeExpense() {
                     <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom: 4px;">${acc.type} Hesabı</div>
                     <h3 class="mb-1" style="font-size: 1.1rem;">${acc.name}</h3>
                     <div class="stat-value ${acc.currency === 'USD' ? 'text-warning' : ''}">${acc.currency === 'USD' ? '$' : '₺'}${acc.balance.toLocaleString('tr-TR')}</div>
+                    <div class="flex justify-end mt-1"><button class="btn btn-sm btn-danger" style="padding: 2px 8px; font-size: 0.75rem;" onclick="deleteItem('account', ${acc.id})">Hesabı Sil</button></div>
                 </div>
             `).join('')}
         </div>
@@ -2027,7 +2699,7 @@ function renderExpenses() {
     return `
          <div class="flex-between mb-2">
             <div><h2>Masraf Yönetimi</h2><p class="text-muted">Personel, operasyon ve proje giderleri</p></div>
-             <button class="btn btn-primary">Masraf Formu Onayla</button>
+             <button class="btn btn-primary" onclick="openModal('expense')">Masraf Ekle / Onayla</button>
         </div>
         <div class="grid grid-3 mb-2">
             <div class="stat-card"><div class="stat-value">₺12,500</div><div class="stat-label">Bu Ay Yakıt</div></div>
@@ -2037,11 +2709,95 @@ function renderExpenses() {
         <div class="card">
             <div class="table-container">
                 <table>
-                    <thead><tr><th>Personel</th><th>Departman</th><th>Kategori</th><th>Tarih</th><th>Tutar</th><th>Durum</th><th>Belge</th></tr></thead>
+                    <thead><tr><th>Tarih</th><th>Kategori</th><th>Açıklama</th><th>Tutar</th><th>İşlem</th></tr></thead>
                     <tbody>
-                        <tr><td>Ahmet Yılmaz</td><td>Satış</td><td>Seyahat</td><td>22.12.2025</td><td class="bold">₺4,500</td><td><span class="badge badge-warning">Onay Bekliyor</span></td><td><button class="btn btn-sm btn-secondary">Görüntüle</button></td></tr>
-                        <tr><td>Ayşe Demir</td><td>Teknik</td><td>Ekipman</td><td>20.12.2025</td><td class="bold">₺1,200</td><td><span class="badge badge-success">Onaylandı</span></td><td><button class="btn btn-sm btn-secondary">Görüntüle</button></td></tr>
-                        <tr><td>Canan Dağ</td><td>Yönetim</td><td>Temsil Ağırlama</td><td>18.12.2025</td><td class="bold">₺8,500</td><td><span class="badge badge-success">Onaylandı</span></td><td><button class="btn btn-sm btn-secondary">Görüntüle</button></td></tr>
+                        \${AppData.expenses.map(e => \`
+                            <tr>
+                                <td>\${formatDate(e.date)}</td>
+                                <td><span class="badge badge-info">\${e.category}</span></td>
+                                <td>\${e.desc}</td>
+                                <td class="bold text-warning">\${formatCurrency(e.amount)}</td>
+                                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('expense', \${e.id})">Sil</button></td>
+                            </tr>
+                        \`).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+}
+
+// --- MODULE: TRAVEL & TASK TRACKING ---
+function renderTravel() {
+    return `
+        <div class="flex-between mb-2">
+            <div>
+                <h2>Araç ve Seyahat Takip Merkezi</h2>
+                <p class="text-muted">Saha operasyonları, kurum ziyaretleri ve iş öncelik yönetimi</p>
+            </div>
+            <div class="flex gap-1">
+                <button class="btn btn-warning" onclick="openModal('travel')">Yeni Görev / Seyahat Ekle</button>
+            </div>
+        </div>
+
+        <div class="grid grid-3 mb-2">
+            <div class="stat-card">
+                 <div class="stat-value text-danger">2</div>
+                 <div class="stat-label">Acil / Kritik Görevler</div>
+            </div>
+            <div class="stat-card">
+                 <div class="stat-value text-info">\${AppData.travels.length}</div>
+                 <div class="stat-label">Toplam Aktif Plan</div>
+            </div>
+            <div class="stat-card">
+                 <div class="stat-value text-success">3</div>
+                 <div class="stat-label">Yolda / Sahada</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Saha Operasyon ve Seyahat Planı</h3>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Öncelik</th><th>Personel</th><th>Araç Plakası</th><th>Kurum / Şehir</th><th>Tarih & Süre</th><th>Görev / Amaç</th><th>Durum</th><th>İşlem</th></tr>
+                    </thead>
+                    <tbody>
+                        \${AppData.travels.map(t => {
+                            let priorityBadge = 'badge-secondary';
+                            if(t.priority === 'Kritik') priorityBadge = 'badge-danger';
+                            if(t.priority === 'Yüksek') priorityBadge = 'badge-warning';
+                            if(t.priority === 'Normal') priorityBadge = 'badge-success';
+
+                            let statusBadge = 'badge-secondary';
+                            if(t.status === 'Yolda' || t.status === 'Bugün') statusBadge = 'badge-primary';
+                            if(t.status === 'Tamamlandı') statusBadge = 'badge-success';
+                            if(t.status === 'Planlanıyor') statusBadge = 'badge-warning';
+
+                            return \`
+                            <tr>
+                                <td><span class="badge \${priorityBadge}">\${t.priority}</span></td>
+                                <td class="bold flex align-center gap-1">\${t.assignee}</td>
+                                <td><span style="background:var(--bg-lighter);padding:4px 8px;border-radius:4px;border:1px solid var(--border);font-family:monospace;">\${t.plate}</span></td>
+                                <td>
+                                    <div class="bold">\${t.hospital}</div>
+                                    <div class="text-muted" style="font-size:0.75rem;">📍 \${t.city}</div>
+                                </td>
+                                <td>
+                                    <div>\${new Date(t.date).toLocaleDateString('tr-TR')}</div>
+                                    <div class="text-muted" style="font-size:0.75rem;">⏱️ \${t.duration} Gün</div>
+                                </td>
+                                <td>\${t.purpose}</td>
+                                <td><span class="badge \${statusBadge}">\${t.status}</span></td>
+                                <td>
+                                    <button class="btn btn-secondary btn-sm" onclick="showToast('Rapor yükleme ekranı açılacak')">Rapor</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('travel', \${t.id})">Sil</button>
+                                </td>
+                            </tr>
+                            \`;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
