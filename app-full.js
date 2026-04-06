@@ -139,21 +139,40 @@ const AppData = {
     ]
 };
 
-// --- CORE FUNCTIONS ---
-function initApp() {
-    loadData();
+// --- CORE FUNCTIONS & SUPABASE ---
+const supabaseUrl = 'https://lzenycakmwdmcwitrlfx.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx6ZW55Y2FrbXdkbWN3aXRybGZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NzQyODEsImV4cCI6MjA5MTA1MDI4MX0.N6hl_1e9QlZE-TDA3WCZZ3Ej4QPPjm__c-wCJIYNtog';
+const supa = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+
+async function initApp() {
+    await loadData();
     loadPage('dashboard');
     setupEventListeners();
     updateNotifications();
 }
 
-function loadData() {
+async function loadData() {
     const DATA_VERSION = 'v3_cockpit';
-    const stored = localStorage.getItem('biyosera_erp_data');
     const storedVersion = localStorage.getItem('biyosera_erp_version');
+
+    if (supa) {
+        try {
+            const { data, error } = await supa.from('biyosera_state').select('payload').eq('id', 1).single();
+            if (data && data.payload) {
+                Object.assign(AppData, data.payload);
+                localStorage.setItem('biyosera_erp_data', JSON.stringify(AppData));
+                localStorage.setItem('biyosera_erp_version', DATA_VERSION);
+                return;
+            }
+        } catch (e) {
+            console.error("Supabase load error", e);
+        }
+    }
+
+    // Fallback to local storage if Supabase fails or is empty
+    const stored = localStorage.getItem('biyosera_erp_data');
     if (stored && storedVersion === DATA_VERSION) {
-        const parsed = JSON.parse(stored);
-        Object.assign(AppData, parsed);
+        Object.assign(AppData, JSON.parse(stored));
     } else {
         localStorage.removeItem('biyosera_erp_data');
         localStorage.setItem('biyosera_erp_version', DATA_VERSION);
@@ -161,26 +180,37 @@ function loadData() {
     }
 }
 
-function saveData() {
+async function saveData() {
     localStorage.setItem('biyosera_erp_data', JSON.stringify(AppData));
     updateNotifications();
+    
+    if (supa) {
+        try {
+            await supa.from('biyosera_state').upsert({ id: 1, payload: AppData });
+        } catch (e) {
+            console.error("Supabase save error", e);
+        }
+    }
 }
 
-function wipeAllData() {
-    if(confirm('DİKKAT: Sisteme işlediğiniz veya hazır gelen TÜM veriler (Müşteriler, Satışlar, Ürünler, Seyahatler vs.) tamamen SİLİNECEK ve BOMBOŞ bir sisteme geçeceksiniz. Emin misiniz?')) {
+async function wipeAllData() {
+    if(confirm('DİKKAT: Sisteme işlediğiniz veya hazır gelen TÜM veriler tamamen SİLİNECEK ve BOMBOŞ bir sisteme geçeceksiniz. Emin misiniz?')) {
         Object.keys(AppData).forEach(key => {
             if(Array.isArray(AppData[key])) AppData[key] = [];
         });
-        saveData();
+        await saveData();
         alert('Tüm veriler temizlendi. Boş veritabanı ile baştan başlatılıyor.');
         location.reload();
     }
 }
 
-function resetToFactoryData() {
+async function resetToFactoryData() {
     if(confirm('Sistem fabrikadan gelen ilk "Test/Demo" verilerine dönecektir. Sizin girdiğiniz veriler varsa silinir. Onaylıyor musunuz?')) {
         localStorage.removeItem('biyosera_erp_data');
         localStorage.removeItem('biyosera_erp_version');
+        if (supa) {
+            await supa.from('biyosera_state').delete().eq('id', 1);
+        }
         location.reload();
     }
 }
