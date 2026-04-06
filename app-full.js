@@ -1297,24 +1297,40 @@ function openModal(type) {
         title.innerText = 'Gelir Ekle';
         body.innerHTML = `
         <form id="form-income" class="grid grid-2 gap-2">
-                <div class="form-group"><label class="form-label">Kategori</label><select id="income-category" class="form-select"><option>Satış</option><option>Yatırım</option></select></div>
-                <div class="form-group"><label class="form-label">Tutar</label><input id="income-amount" type="number" class="form-input"></div>
-                <div class="form-group"><label class="form-label">Tarih</label><input id="income-date" type="date" class="form-input"></div>
+                <div class="form-group" style="grid-column: span 2"><label class="form-label">Kategori</label><select id="income-category" class="form-select">
+                    <option>Cihaz Satışı</option>
+                    <option>Aksesuar Satışı</option>
+                    <option>Yedek Parça</option>
+                    <option>Servis Bakım</option>
+                    <option>Tamir Destek</option>
+                    <option>Diğer Gelir</option>
+                </select></div>
+                <div class="form-group"><label class="form-label">Tutar (₺)</label><input id="income-amount" type="number" class="form-input"></div>
+                <div class="form-group"><label class="form-label">İşlem Tarihi</label><input id="income-date" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+                <div class="form-group" style="grid-column: span 2"><label class="form-label">Paranın Geleceği Tarih (Vade)</label><input id="income-due-date" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
                 <div class="form-group" style="grid-column:span 2"><label class="form-label">Açıklama</label><input id="income-desc" type="text" class="form-input"></div>
             </form>
-        <div class="flex justify-end mt-2"><button class="btn btn-success w-100" onclick="handleFormSubmit('income')">Kaydet</button></div>
+        <div class="flex justify-end mt-2"><button class="btn btn-success w-100" onclick="handleFormSubmit('income')">Geliri Kaydet</button></div>
     `;
     }
     else if (type === 'expense') {
-        title.innerText = 'Gider Ekle';
+        title.innerText = 'Gider / Çıkart Ekle';
         body.innerHTML = `
         <form id="form-expense" class="grid grid-2 gap-2">
-                <div class="form-group"><label class="form-label">Kategori</label><select id="expense-category" class="form-select"><option>Personel</option><option>Kira</option></select></div>
-                <div class="form-group"><label class="form-label">Tutar</label><input id="expense-amount" type="number" class="form-input"></div>
-                <div class="form-group"><label class="form-label">Tarih</label><input id="expense-date" type="date" class="form-input"></div>
+                <div class="form-group"><label class="form-label">Kategori</label><select id="expense-category" class="form-select">
+                    <option>Personel / Maaş</option>
+                    <option>Kira / Ofis</option>
+                    <option>Vergi / SGK</option>
+                    <option>Hammadde / Satın Alma</option>
+                    <option>Lojistik</option>
+                    <option>Diğer Gider</option>
+                </select></div>
+                <div class="form-group"><label class="form-label">Tutar (₺)</label><input id="expense-amount" type="number" class="form-input"></div>
+                <div class="form-group"><label class="form-label">İşlem Tarihi</label><input id="expense-date" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
+                <div class="form-group"><label class="form-label">Ödenmesi Gereken Tarih</label><input id="expense-due-date" type="date" class="form-input" value="${new Date().toISOString().split('T')[0]}"></div>
                 <div class="form-group" style="grid-column:span 2"><label class="form-label">Açıklama</label><input id="expense-desc" type="text" class="form-input"></div>
             </form>
-        <div class="flex justify-end mt-2"><button class="btn btn-danger w-100" onclick="handleFormSubmit('expense')">Kaydet</button></div>
+        <div class="flex justify-end mt-2"><button class="btn btn-danger w-100" onclick="handleFormSubmit('expense')">Gideri Kaydet</button></div>
     `;
     }
     else if (type === 'service-form') {
@@ -1763,6 +1779,7 @@ function handleFormSubmit(type) {
         const amount = parseFloat(document.getElementById('income-amount').value) || 0;
         const category = document.getElementById('income-category').value;
         const date = document.getElementById('income-date').value || today;
+        const dueDate = document.getElementById('income-due-date').value || date;
         const desc = document.getElementById('income-desc').value || 'Gelir';
 
         if (!amount) {
@@ -1774,21 +1791,23 @@ function handleFormSubmit(type) {
             id: Date.now(),
             customerId: 0, // Genel gelir
             amount: amount,
-            dueDate: date,
-            status: 'Tahsil Edildi',
+            date: date,
+            dueDate: dueDate,
+            status: 'Bekliyor', // Tahsil Edildi değil çünkü vade girildi
             ref: generateRef('GEL'),
-            desc: desc
+            desc: category + ' - ' + desc
         });
 
         saveData();
         closeModal();
-        showToast('Gelir kaydedildi: ' + formatCurrency(amount), 'success');
+        showToast('Gelir (Alacak) kaydedildi: ' + formatCurrency(amount), 'success');
         loadPage('finansal');
     }
     else if (type === 'expense') {
         const amount = parseFloat(document.getElementById('expense-amount').value) || 0;
         const category = document.getElementById('expense-category').value;
         const date = document.getElementById('expense-date').value || today;
+        const dueDate = document.getElementById('expense-due-date').value || date;
         const desc = document.getElementById('expense-desc').value || 'Gider';
 
         if (!amount) {
@@ -1810,8 +1829,8 @@ function handleFormSubmit(type) {
             id: Date.now(),
             supplier: desc,
             amount: amount,
-            dueDate: date,
-            status: 'Ödendi',
+            dueDate: dueDate,
+            status: 'Bekliyor', // Ödendi yerine vade var
             type: category,
             ref: generateRef('MAS')
         });
