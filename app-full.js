@@ -386,11 +386,19 @@ function loadPage(page) {
             title.innerText = 'Araç ve Seyahat Takip Merkezi';
             html = renderTravel();
             break;
+        case 'neuro-sync':
+            title.innerText = 'Zaman ve Disiplin Haritası';
+            html = renderNeuroSync();
+            break;
         default:
             title.innerText = page.charAt(0).toUpperCase() + page.slice(1);
             html = `<div class="card"><h3>Modül Hazırlanıyor...</h3><p>${page} modülü yakında aktif olacak.</p></div>`;
     }
     content.innerHTML = html;
+    
+    if (page === 'neuro-sync' && typeof initNeuroSyncD3 === 'function') {
+        setTimeout(initNeuroSyncD3, 10);
+    }
 }
 
 // --- MODULE: USERS (RBAC) ---

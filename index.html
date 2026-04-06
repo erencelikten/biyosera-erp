@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Biyosera ERP - Kurumsal Yönetim Sistemi</title>
     <meta name="description" content="Biyosera Medical için kapsamlı ERP/CRM yönetim sistemi">
-    <link rel="stylesheet" href="styles.css?v=6">
+    <link rel="stylesheet" href="styles.css?v=8">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
 <body>
@@ -231,6 +232,18 @@
                 </div>
 
                 <div class="nav-section">
+                    <div class="nav-section-title">Verimlilik & Disiplin</div>
+                    <a href="#" class="nav-item" data-page="neuro-sync">
+                        <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
+                        <span>Nöro-Zaman Haritası</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
                     <div class="nav-section-title">Diğer</div>
                     <a href="#" class="nav-item" data-page="onay">
                         <svg class="nav-item-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -440,6 +453,7 @@
     </script>
 
     <script src="app-full.js"></script>
+    <script src="neuro-sync.js"></script>
 </body>
 
 </html>
