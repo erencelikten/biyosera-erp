@@ -490,12 +490,24 @@ table tr:hover { background: rgba(255,255,255,0.015); }
     
     /* Dashboard & Cards - Extremely Dense */
     .cockpit-main { grid-template-columns: 1fr; gap: 8px; }
-    .d-card, .card, .stat-card { padding: 12px; gap: 8px; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+    .d-card, .card, .stat-card { padding: 16px 12px; gap: 10px; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
     .auth-card { padding: 16px; border-radius: 20px; }
     
-    /* Gauges Layout */
-    .cockpit-gauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .gauge-widget { padding: 2px; }
+    /* REMOVE COCKPIT GAUGES ON MOBILE - SHOW FLAT NUMBERS */
+    .gauge-widget svg { display: none !important; }
+    .d-gauge-center { position: relative !important; transform: none !important; width: 100% !important; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 12px 4px !important; display: flex !important; flex-direction: column; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .d-gauge-center .d-amount { font-size: 1.15rem !important; }
+    .d-gauge-center .d-label { font-size: 0.6rem !important; opacity: 0.8; }
+    .cockpit-gauges { display: grid; grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+    .gauge-widget { padding: 0 !important; }
+    
+    /* Fix dashboard row squeezing */
+    .dash-row { flex-direction: column !important; gap: 12px !important; }
+    
+    /* Fix text truncation in stat-row */
+    .stat-row { flex-direction: row !important; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 12px !important; gap: 8px; }
+    .stat-row-left { flex: 1; min-width: max-content; }
+    .stat-value-group { flex: 1; text-align: right; }
     
     /* Grid & Flex Edge-to-Edge */
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 8px; }
