@@ -472,9 +472,9 @@ table tr:hover { background: rgba(255,255,255,0.015); }
     .sidebar { position: fixed; left: -280px; width: 280px; transition: left 0.3s; z-index: 100; }
     .sidebar.open { left: 0; }
     .sidebar-overlay.active { display: block; }
-    .mobile-menu-toggle { display: flex; }
-    .topbar { padding: 0 12px; height: 50px; }
-    .content { padding: 8px; margin-top: 50px; height: calc(100vh - 50px); }
+    .mobile-menu-toggle { display: flex; color: white; }
+    .topbar { padding: 0 16px; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .content { padding: 12px; height: calc(100vh - 60px); overflow-y: auto; }
     .search-box { display: none; }
     
     /* Video Fix for Mobile */
@@ -494,10 +494,11 @@ table tr:hover { background: rgba(255,255,255,0.015); }
     .auth-card { padding: 16px; border-radius: 20px; }
     
     /* REMOVE COCKPIT GAUGES ON MOBILE - SHOW FLAT NUMBERS */
-    .gauge-widget svg { display: none !important; }
-    .d-gauge-center { position: relative !important; transform: none !important; width: 100% !important; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); padding: 12px 4px !important; display: flex !important; flex-direction: column; justify-content: center; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    .d-gauge-center .d-amount { font-size: 1.15rem !important; }
-    .d-gauge-center .d-label { font-size: 0.6rem !important; opacity: 0.8; }
+    .gauge-wrapper .gauge-svg { display: none !important; }
+    .gauge-wrapper { padding: 12px !important; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .gauge-center { position: static !important; }
+    .gauge-percent { font-size: 1.15rem !important; }
+    .gauge-label-group { margin-top: 4px !important; }
     .cockpit-gauges { display: grid; grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
     .gauge-widget { padding: 0 !important; }
     

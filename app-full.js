@@ -489,8 +489,8 @@ function generateSVGGauge(percentage, label, valueStr, color) {
     const offset = circumference - (percentage / 100) * circumference;
     
     return `
-    <div style="display:flex; flex-direction:column; align-items:center; position:relative; padding:10px;">
-        <svg width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
+    <div class="gauge-wrapper" style="display:flex; flex-direction:column; align-items:center; position:relative; padding:10px;">
+        <svg class="gauge-svg" width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
             <defs>
                 <filter id="glow-gauge-${color.replace('#','')}">
                     <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -504,12 +504,12 @@ function generateSVGGauge(percentage, label, valueStr, color) {
                 stroke-dasharray="${circumference}" stroke-dashoffset="${offset}" stroke-linecap="round"
                 filter="url(#glow-gauge-${color.replace('#','')})" style="transition: stroke-dashoffset 1s ease-in-out;" />
         </svg>
-        <div style="position:absolute; top:40px; text-align:center;">
-            <div class="bold" style="font-size:1.1rem; color:var(--text-main); letter-spacing:-0.03em;">${percentage}%</div>
+        <div class="gauge-center">
+            <div class="bold gauge-percent">${percentage}%</div>
         </div>
-        <div style="text-align:center; margin-top:8px;">
-            <div class="text-muted" style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em;">${label}</div>
-            <div class="bold" style="font-size:0.9rem; margin-top:2px; color:var(--text-primary);">${valueStr}</div>
+        <div class="gauge-label-group">
+            <div class="text-muted gauge-label">${label}</div>
+            <div class="bold gauge-value" style="color:var(--text-primary);">${valueStr}</div>
         </div>
     </div>`;
 }
@@ -537,16 +537,16 @@ function renderDashboard() {
             <!-- ROW 0: THE EXTREME GAUGES GROUPED -->
             <div class="d-card mb-2" style="padding: 24px;">
                 <div class="cockpit-gauges">
-                    <div style="display:flex; justify-content:center; align-items:center;">
+                    <div class="gauge-widget">
                         ${generateSVGGauge(45, 'NET KÂR MARJI', formatCurrency(netCashFlow), '#10B981')}
                     </div>
-                    <div style="display:flex; justify-content:center; align-items:center;">
+                    <div class="gauge-widget">
                         ${generateSVGGauge(72, 'TAHSİLAT ORANI', formatCurrency(totalSales), '#6D4AFF')}
                     </div>
-                    <div style="display:flex; justify-content:center; align-items:center;">
+                    <div class="gauge-widget">
                         ${generateSVGGauge(38, 'AÇIK ALACAK', formatCurrency(totalReceivables), '#3B82F6')}
                     </div>
-                    <div style="display:flex; justify-content:center; align-items:center;">
+                    <div class="gauge-widget">
                         ${generateSVGGauge(15, 'RİSKLİ BORÇ', formatCurrency(totalPayables), '#FF5263')}
                     </div>
                 </div>
