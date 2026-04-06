@@ -489,7 +489,7 @@ function generateSVGGauge(percentage, label, valueStr, color) {
     const offset = circumference - (percentage / 100) * circumference;
     
     return `
-    <div class="gauge-wrapper" style="display:flex; flex-direction:column; align-items:center; position:relative; padding:10px;">
+    <div class="gauge-wrapper flex-1" style="display:flex; flex-direction:column; align-items:center; position:relative; padding:10px;">
         <svg class="gauge-svg" width="100" height="100" viewBox="0 0 100 100" style="transform: rotate(-90deg);">
             <defs>
                 <filter id="glow-gauge-${color.replace('#','')}">
@@ -536,12 +536,8 @@ function renderDashboard() {
             
             <!-- ROW 0: THE EXTREME GAUGES GROUPED -->
             <div class="dash-row mb-2">
-                <div class="d-card flex-1">
-                    ${generateSVGGauge(38, 'AÇIK ALACAK (BAKİYE)', formatCurrency(totalReceivables), '#3B82F6')}
-                </div>
-                <div class="d-card flex-1">
-                    ${generateSVGGauge(15, 'RİSKLİ BORÇ', formatCurrency(totalPayables), '#FF5263')}
-                </div>
+                ${generateSVGGauge(38, 'AÇIK ALACAK (BAKİYE)', formatCurrency(totalReceivables), '#3B82F6')}
+                ${generateSVGGauge(15, 'RİSKLİ BORÇ', formatCurrency(totalPayables), '#FF5263')}
             </div>
 
             <!-- ROW 1: Wide Chart + Daily Stats -->
