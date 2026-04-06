@@ -159,8 +159,8 @@ body {
 /* ========== CARDS ========== */
 .card {
     background: rgba(30, 30, 40, 0.15);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    backdrop-filter: blur(12px) saturate(200%);
+    -webkit-backdrop-filter: blur(12px) saturate(200%);
     border: none;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0,0,0,0.25);
     border-radius: var(--radius-xl);
@@ -184,7 +184,7 @@ body {
 /* ========== STAT CARDS (PREMIUM GLASS) ========== */
 .stat-card {
     background: rgba(30, 30, 40, 0.15); 
-    backdrop-filter: blur(24px) saturate(200%); -webkit-backdrop-filter: blur(24px) saturate(200%);
+    backdrop-filter: blur(12px) saturate(200%); -webkit-backdrop-filter: blur(12px) saturate(200%);
     border: none;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 40px rgba(0,0,0,0.3);
     border-radius: var(--radius-xl); 
@@ -547,6 +547,6 @@ table tr:hover { background: rgba(255,255,255,0.015); }
     object-fit: cover; /* Ensuring it fills the entire background without gaps */
     transform: translate(-50%, -50%) rotate(-90deg);
     z-index: -9999;
-    opacity: 0.35; /* Increased opacity slightly to punch through the blur */
+    opacity: 0.9; /* Increased dramatically for glassmorphism pop */
     pointer-events: none;
 }
