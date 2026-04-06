@@ -158,7 +158,7 @@ body {
 
 /* ========== CARDS ========== */
 .card {
-    background: rgba(30, 30, 40, 0.15);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(12px) saturate(200%);
     -webkit-backdrop-filter: blur(12px) saturate(200%);
     border: none;
@@ -183,7 +183,7 @@ body {
 
 /* ========== STAT CARDS (PREMIUM GLASS) ========== */
 .stat-card {
-    background: rgba(30, 30, 40, 0.15); 
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(12px) saturate(200%); -webkit-backdrop-filter: blur(12px) saturate(200%);
     border: none;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 40px rgba(0,0,0,0.3);
@@ -192,10 +192,7 @@ body {
     position: relative; overflow: hidden;
     display: flex; flex-direction: column; justify-content: center;
 }
-.stat-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, var(--accent), var(--primary));
-}
+
 .stat-value {
     font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; color: var(--text-main);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -344,7 +341,7 @@ table tr:hover { background: rgba(255,255,255,0.015); }
 
 /* Base Card Style for Dashboard */
 .d-card {
-    background: rgba(30, 30, 40, 0.15);
+    background: rgba(255, 255, 255, 0.02);
     backdrop-filter: blur(24px) saturate(200%);
     -webkit-backdrop-filter: blur(24px) saturate(200%);
     border: none;
