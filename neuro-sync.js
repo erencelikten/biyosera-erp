@@ -30,7 +30,7 @@ function renderNeuroSync() {
         </div>
 
         <!-- Color Picker Modal -->
-        <div id="neuroModal" class="sidebar-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
+        <div id="neuroModal" class="modal-overlay" style="display: none; align-items: center; justify-content: center; z-index: 9999;">
             <div class="card" style="width: 320px; padding: 30px; border-radius: 24px; box-shadow: 0 24px 50px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); max-height: 90vh; overflow-y: auto;">
                 <h3 id="neuroModalDate" style="text-align: center; margin-bottom: 24px; font-weight: 800; font-size: 1.2rem; color: white;">GÜN</h3>
                 <input type="hidden" id="neuroSelectedDay" />

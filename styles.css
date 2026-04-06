@@ -465,61 +465,59 @@ table tr:hover { background: rgba(255,255,255,0.015); }
 
 /* Mobile Menu Button */
 .mobile-menu-toggle { display: none; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; }
-.sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto; padding: 20px 10px; align-items: flex-start !important; }
+.sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 99; transition: opacity 0.3s ease; }
 
 /* ========== RESPONSIVE ========== */
-@media (max-width: 1200px) {
-    .grid-4 { grid-template-columns: repeat(2, 1fr); }
-    .cockpit-main { grid-template-columns: 1fr 1fr; }
-    .cockpit-right { display: none; }
-}
 @media (max-width: 900px) {
-    .sidebar { position: fixed; left: -280px; width: 280px; transition: left 0.3s; }
+    .sidebar { position: fixed; left: -280px; width: 280px; transition: left 0.3s; z-index: 100; }
     .sidebar.open { left: 0; }
     .sidebar-overlay.active { display: block; }
     .mobile-menu-toggle { display: flex; }
-    .topbar { padding: 0 16px; height: 60px; }
-    .content { padding: 12px; }
+    .topbar { padding: 0 12px; height: 50px; }
+    .content { padding: 8px; margin-top: 50px; height: calc(100vh - 50px); }
     .search-box { display: none; }
     
-    /* Video Fix for Mobile (Phone is already portrait, no need to rotate) */
+    /* Video Fix for Mobile */
     #kokpit-bg-video {
         width: 100vw;
         height: 100vh;
-        transform: translate(-50%, -50%); /* Removed the -90deg rotation */
+        transform: translate(-50%, -50%); 
     }
     
-    /* Dashboard & Cards */
-    .cockpit-main { grid-template-columns: 1fr; gap: 12px; }
-    .d-card, .card, .stat-card { padding: 14px; gap: 10px; border-radius: 20px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 8px 30px rgba(0,0,0,0.5); }
-    .auth-card { padding: 20px; max-width: 100%; border-radius: 24px; }
+    /* Modal Scrolling Fix for Mobile */
+    .modal-overlay { align-items: flex-start !important; overflow-y: auto; padding: 20px 10px; }
+    .modal, .card, .auth-card { max-height: max-content; margin: auto; }
+    
+    /* Dashboard & Cards - Extremely Dense */
+    .cockpit-main { grid-template-columns: 1fr; gap: 8px; }
+    .d-card, .card, .stat-card { padding: 12px; gap: 8px; border-radius: 16px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); }
+    .auth-card { padding: 16px; border-radius: 20px; }
     
     /* Gauges Layout */
-    .cockpit-gauges { 
-        display: grid; 
-        grid-template-columns: repeat(2, 1fr); 
-        gap: 10px; 
-    }
-    .gauge-widget { 
-        padding: 4px; 
-    }
+    .cockpit-gauges { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .gauge-widget { padding: 2px; }
     
-    /* Grid & Flex Fallbacks */
-    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 10px; }
-    .flex-between { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .flex-between button { width: 100%; }
-    .flex-between .flex { width: 100%; flex-direction: column; gap: 8px; }
+    /* Grid & Flex Edge-to-Edge */
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 8px; }
+    .flex-between { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .flex-between button { width: 100%; padding: 10px; font-size: 0.9rem; }
+    .flex-between .flex { width: 100%; flex-direction: column; gap: 6px; }
     
-    /* Tables on Mobile */
-    .table-container { padding-bottom: 8px; margin: 0 -8px; width: calc(100% + 16px); }
-    .table-container table { font-size: 0.8rem; }
-    .table-container th, .table-container td { padding: 10px 8px; white-space: nowrap; }
+    /* Native App List Style Tables */
+    .d-card-header { padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .table-container { padding-bottom: 4px; margin: 0 -12px; width: calc(100% + 24px); }
+    .table-container table { font-size: 0.75rem; }
+    .table-container th, .table-container td { padding: 8px 10px; font-weight: 500; }
     
-    /* Make typography tighter on mobile */
-    .d-value-large, .stat-value { font-size: 1.4rem; }
-    h2, .page-title { font-size: 1.15rem; }
-    .stat-label { font-size: 0.7rem; }
-    .nav-item { padding: 8px 12px; font-size: 0.85rem; }
+    /* Make typography strictly compact */
+    .d-value-large { font-size: 1.25rem; font-weight: 700; }
+    .stat-value { font-size: 1.3rem; margin-bottom: 4px; }
+    h2, .page-title { font-size: 1.05rem; font-weight: 700; margin: 0; }
+    p { font-size: 0.8rem; line-height: 1.3; margin: 2px 0; }
+    .stat-label { font-size: 0.65rem; }
+    .nav-item { padding: 8px 10px; font-size: 0.8rem; margin-bottom: 2px; border-radius: 8px; }
+    .d-segment-control { padding: 2px; gap: 2px; }
+    .d-seg-btn { padding: 4px 8px; font-size: 0.8rem; }
 }
 
 /* ========== PRINT ========== */
