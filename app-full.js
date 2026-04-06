@@ -925,7 +925,7 @@ function renderFinance() {
                             <td class="p-2">${getCustomerName(r.customerId)}</td>
                             <td class="p-2 text-right">${formatDate(r.dueDate)}</td>
                             <td class="p-2 text-right text-success bold">${formatCurrency(r.amount)}</td>
-                            <td class="p-2 text-right"><button class="btn btn-danger btn-sm" onclick="deleteItem('receivable', ${r.id})">Sil</button></td>
+                            <td class="p-2 text-right"><button class="btn btn-warning btn-sm" onclick="editItem('income', ${r.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('receivable', ${r.id})">Sil</button></td>
                         </tr>
                     `).join('')}
                 </table>
@@ -938,7 +938,7 @@ function renderFinance() {
                             <td class="p-2">${p.supplier}</td>
                             <td class="p-2 text-right">${formatDate(p.dueDate)}</td>
                             <td class="p-2 text-right text-danger bold">${formatCurrency(p.amount)}</td>
-                            <td class="p-2 text-right"><button class="btn btn-danger btn-sm" onclick="deleteItem('payable', ${p.id})">Sil</button></td>
+                            <td class="p-2 text-right"><button class="btn btn-warning btn-sm" onclick="editItem('purchase', ${p.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('payable', ${p.id})">Sil</button></td>
                         </tr>
                     `).join('')}
                 </table>
@@ -1007,7 +1007,7 @@ function renderChecks() {
             (c.status === 'Karşılıksız' ? 'danger' : 'warning')
         }">${c.status}</span>
                                 <td>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('check', ${c.id})">Sil</button>
+                                    <button class="btn btn-warning btn-sm" onclick="editItem('check', ${c.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('check', ${c.id})">Sil</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -1479,8 +1479,96 @@ function addProformaItemRow() {
 }
 
 function closeModal() {
+    window.editingItemId = null;
+    window.editingItemType = null;
     const modal = document.getElementById('modalOverlay');
     modal.classList.remove('active');
+}
+
+function editItem(type, id) {
+    window.editingItemId = id;
+    window.editingItemType = type;
+    openModal(type);
+    setTimeout(() => {
+        let item;
+        switch (type) {
+            case 'customer':
+                item = AppData.customers.find(c => c.id === id);
+                if (item) {
+                    document.getElementById('cust-name').value = item.name;
+                    document.getElementById('cust-city').value = item.city;
+                    document.getElementById('cust-type').value = item.type;
+                    document.getElementById('cust-contact').value = item.contact;
+                    document.getElementById('cust-phone').value = item.phone;
+                }
+                break;
+            case 'product':
+                item = AppData.products.find(p => p.id === id);
+                if (item) {
+                    document.getElementById('prod-name').value = item.name;
+                    document.getElementById('prod-price').value = item.price;
+                    document.getElementById('prod-stock').value = item.stock;
+                }
+                break;
+            case 'project':
+                item = AppData.projects.find(p => p.id === id);
+                if (item) {
+                    document.getElementById('prj-name').value = item.name;
+                    document.getElementById('prj-manager').value = item.lead || item.manager || '';
+                    document.getElementById('prj-status').value = item.status;
+                    document.getElementById('prj-start').value = item.startDate || '';
+                    document.getElementById('prj-end').value = item.endDate || '';
+                    document.getElementById('prj-progress').value = item.progress || 0;
+                }
+                break;
+            case 'check':
+                item = AppData.checks.find(c => c.id === id);
+                if (item) {
+                    document.getElementById('chk-type').value = item.type;
+                    document.getElementById('chk-owner').value = item.owner || '';
+                    document.getElementById('chk-amount').value = item.amount;
+                    document.getElementById('chk-due').value = item.dueDate;
+                }
+                break;
+            case 'purchase':
+            case 'payable':
+                item = AppData.payables.find(p => p.id === id);
+                if (item) {
+                    document.getElementById('pur-supplier').value = item.supplier;
+                    document.getElementById('pur-type').value = item.type || '';
+                    document.getElementById('pur-amount').value = item.amount;
+                    document.getElementById('pur-date').value = item.dueDate;
+                }
+                break;
+            case 'income':
+                item = AppData.receivables.find(r => r.id === id);
+                if (item) {
+                    document.getElementById('income-amount').value = item.amount;
+                    document.getElementById('income-date').value = item.date || item.dueDate;
+                    document.getElementById('income-due-date').value = item.dueDate || '';
+                    document.getElementById('income-desc').value = item.desc;
+                }
+                break;
+            case 'expense':
+                item = AppData.expenses.find(e => e.id === id);
+                if (item) {
+                    document.getElementById('expense-amount').value = item.amount;
+                    document.getElementById('expense-category').value = item.category;
+                    document.getElementById('expense-date').value = item.date;
+                    document.getElementById('expense-desc').value = item.desc;
+                }
+                break;
+            case 'hr':
+                item = AppData.employees.find(e => e.id === id);
+                if (item) {
+                    document.getElementById('hr-name').value = item.name;
+                    document.getElementById('hr-dept').value = item.dept;
+                    document.getElementById('hr-status').value = item.status;
+                    document.getElementById('hr-pos').value = item.pos;
+                }
+                break;
+        }
+    }, 100);
 }
 
 // --- PDF GENERATOR CORE ---
@@ -1787,16 +1875,23 @@ function handleFormSubmit(type) {
             return;
         }
 
-        AppData.receivables.push({
-            id: Date.now(),
-            customerId: 0, // Genel gelir
+        let newItem = {
             amount: amount,
             date: date,
             dueDate: dueDate,
-            status: 'Bekliyor', // Tahsil Edildi değil çünkü vade girildi
-            ref: generateRef('GEL'),
-            desc: category + ' - ' + desc
-        });
+            desc: desc.startsWith(category) ? desc : (category + ' - ' + desc)
+        };
+
+        if (window.editingItemId) {
+            let exist = AppData.receivables.find(r => r.id === window.editingItemId);
+            if(exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = Date.now();
+            newItem.customerId = 0;
+            newItem.status = 'Bekliyor';
+            newItem.ref = generateRef('GEL');
+            AppData.receivables.push(newItem);
+        }
 
         saveData();
         closeModal();
@@ -1815,25 +1910,27 @@ function handleFormSubmit(type) {
             return;
         }
 
-        AppData.expenses.push({
-            id: Date.now(),
-            category: category,
-            amount: amount,
-            date: date,
-            desc: desc,
-            ref: generateRef('GID')
-        });
+        let expItem = { category: category, amount: amount, date: date, desc: desc };
+        let payItem = { supplier: desc, amount: amount, dueDate: dueDate, type: category };
 
-        // Ayrıca payables'a da ekle
-        AppData.payables.push({
-            id: Date.now(),
-            supplier: desc,
-            amount: amount,
-            dueDate: dueDate,
-            status: 'Bekliyor', // Ödendi yerine vade var
-            type: category,
-            ref: generateRef('MAS')
-        });
+        if (window.editingItemId) {
+            let existExp = AppData.expenses.find(e => e.id === window.editingItemId);
+            if (existExp) {
+                // Find matching payable roughly
+                let existPay = AppData.payables.find(p => p.supplier === existExp.desc && p.amount === existExp.amount);
+                Object.assign(existExp, expItem);
+                if (existPay) Object.assign(existPay, payItem);
+            }
+        } else {
+            expItem.id = Date.now();
+            expItem.ref = generateRef('GID');
+            AppData.expenses.push(expItem);
+
+            payItem.id = Date.now() + 1;
+            payItem.status = 'Bekliyor';
+            payItem.ref = generateRef('MAS');
+            AppData.payables.push(payItem);
+        }
 
         saveData();
         closeModal();
@@ -1878,15 +1975,16 @@ function handleFormSubmit(type) {
             return;
         }
 
-        AppData.employees.push({
-            id: 100 + AppData.employees.length + 1,
-            name: name,
-            dept: dept,
-            pos: pos,
-            status: status,
-            salary: 50000,
-            start: today
-        });
+        let newItem = { name: name, dept: dept, pos: pos, status: status };
+        if (window.editingItemId) {
+            let exist = AppData.employees.find(e => e.id === window.editingItemId);
+            if (exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = 100 + AppData.employees.length + 1;
+            newItem.salary = 50000;
+            newItem.start = today;
+            AppData.employees.push(newItem);
+        }
 
         saveData();
         closeModal();
@@ -1904,16 +2002,17 @@ function handleFormSubmit(type) {
         if (!name) return alert('Proje adı giriniz.');
 
         if (!AppData.projects) AppData.projects = [];
-        AppData.projects.push({
-            id: Date.now(),
-            name: name,
-            manager: manager,
-            startDate: start,
-            endDate: end,
-            status: status,
-            progress: progress,
-            ref: generateRef('PRO')
-        });
+        let newItem = {
+            name: name, manager: manager, startDate: start, endDate: end, status: status, progress: progress
+        };
+        if (window.editingItemId) {
+            let exist = AppData.projects.find(p => p.id === window.editingItemId);
+            if (exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = Date.now();
+            newItem.ref = generateRef('PRO');
+            AppData.projects.push(newItem);
+        }
         saveData();
         closeModal();
         showToast('Proje başarıyla kaydedildi.', 'success');
@@ -1928,15 +2027,16 @@ function handleFormSubmit(type) {
         if (!amount || !owner) return alert('Lütfen bilgileri doldurunuz.');
 
         if (!AppData.checks) AppData.checks = [];
-        AppData.checks.push({
-            id: Date.now(),
-            type: checkType,
-            owner: owner,
-            amount: amount,
-            dueDate: dueDate,
-            status: 'Portföyde',
-            ref: generateRef('EVR')
-        });
+        let newItem = { type: checkType, owner: owner, amount: amount, dueDate: dueDate };
+        if (window.editingItemId) {
+            let exist = AppData.checks.find(c => c.id === window.editingItemId);
+            if (exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = Date.now();
+            newItem.status = 'Portföyde';
+            newItem.ref = generateRef('EVR');
+            AppData.checks.push(newItem);
+        }
         saveData();
         closeModal();
         showToast('Evrak kaydedildi.', 'success');
@@ -1951,15 +2051,16 @@ function handleFormSubmit(type) {
 
         if (!supplier || !amount) return alert('Lütfen bilgileri doldurunuz.');
 
-        AppData.payables.push({
-            id: Date.now(),
-            supplier: supplier,
-            amount: amount,
-            dueDate: inDate,
-            status: 'Bekliyor',
-            type: typeCat,
-            ref: generateRef('ALM')
-        });
+        let newItem = { supplier: supplier, amount: amount, dueDate: inDate, type: typeCat };
+        if (window.editingItemId) {
+            let exist = AppData.payables.find(p => p.id === window.editingItemId);
+            if (exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = Date.now();
+            newItem.status = 'Bekliyor';
+            newItem.ref = generateRef('ALM');
+            AppData.payables.push(newItem);
+        }
         saveData();
         closeModal();
         showToast('Sipariş kaydedildi.', 'success');
@@ -1977,14 +2078,14 @@ function handleFormSubmit(type) {
             return;
         }
 
-        AppData.customers.push({
-            id: AppData.customers.length + 1,
-            name: name,
-            city: city,
-            type: custType,
-            contact: contact,
-            phone: phone
-        });
+        let newItem = { name: name, city: city, type: custType, contact: contact, phone: phone };
+        if (window.editingItemId) {
+            let exist = AppData.customers.find(c => c.id === window.editingItemId);
+            if (exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = AppData.customers.length + 1;
+            AppData.customers.push(newItem);
+        }
 
         saveData();
         closeModal();
@@ -2001,12 +2102,14 @@ function handleFormSubmit(type) {
             return;
         }
 
-        AppData.products.push({
-            id: AppData.products.length + 1,
-            name: name,
-            price: price,
-            stock: stock
-        });
+        let newItem = { name: name, price: price, stock: stock };
+        if (window.editingItemId) {
+            let exist = AppData.products.find(p => p.id === window.editingItemId);
+            if (exist) Object.assign(exist, newItem);
+        } else {
+            newItem.id = AppData.products.length + 1;
+            AppData.products.push(newItem);
+        }
 
         saveData();
         closeModal();
@@ -2360,7 +2463,7 @@ function renderPurchasing() {
                                 <td>${getDaysRemaining(p.dueDate)}</td>
                                 <td><span class="badge badge-warning">${p.status}</span></td>
                                 <td>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('payable', ${p.id})">Sil</button>
+                                    <button class="btn btn-warning btn-sm" onclick="editItem('purchase', ${p.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('payable', ${p.id})">Sil</button>
                                 </td>
                             </tr>
                         `).join('')}
@@ -2395,7 +2498,7 @@ function renderProduction() {
                                 <td>#${p.id}</td><td><strong>${p.name}</strong></td>
                                 <td class="${p.stock < 10 ? 'text-danger bold' : 'bold'}">${p.stock} Adet</td>
                                 <td>${formatCurrency(p.price)}</td><td class="text-success">${formatCurrency(p.price * p.stock)}</td>
-                                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('product', ${p.id})">Sil</button></td>
+                                <td><button class="btn btn-warning btn-sm" onclick="editItem('product', ${p.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('product', ${p.id})">Sil</button></td>
                             </tr>
                          `).join('')}
                     </tbody>
@@ -2430,7 +2533,7 @@ function renderHR() {
                                 <td>#${e.id}</td><td><strong>${e.name}</strong></td><td>${e.pos}</td><td>${e.dept}</td>
                                 <td>${formatCurrency(e.salary)}</td><td>${formatDate(e.start)}</td>
                                 <td><span class="badge badge-${e.status === 'Aktif' ? 'success' : 'warning'}">${e.status}</span></td>
-                                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('employee', ${e.id})">Sil</button></td>
+                                <td><button class="btn btn-warning btn-sm" onclick="editItem('hr', ${e.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('employee', ${e.id})">Sil</button></td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2499,7 +2602,7 @@ function renderProjects() {
                     <span class="badge badge-secondary" style="background:rgba(255,255,255,0.05);">${p.ref || generateRef('PRO')}</span>
                     <div class="flex gap-1" style="align-items: center;">
                         <span class="text-muted" style="font-size: 0.85rem;">Bitiş: ${formatDate(p.deadline || p.endDate || p.startDate)}</span>
-                        <button class="btn btn-sm btn-danger" style="margin-left: 10px;" onclick="deleteItem('project', ${p.id})">Sil</button>
+                        <button class="btn btn-warning btn-sm" onclick="editItem('project', ${p.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-sm btn-danger" style="margin-left: 10px;" onclick="deleteItem('project', ${p.id})">Sil</button>
                     </div>
                 </div>
             </div>
@@ -2736,7 +2839,7 @@ function renderExpenses() {
                                 <td><span class="badge badge-info">\${e.category}</span></td>
                                 <td>\${e.desc}</td>
                                 <td class="bold text-warning">\${formatCurrency(e.amount)}</td>
-                                <td><button class="btn btn-danger btn-sm" onclick="deleteItem('expense', \${e.id})">Sil</button></td>
+                                <td><button class="btn btn-warning btn-sm" onclick="editItem('expense', \${e.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('expense', \${e.id})">Sil</button></td>
                             </tr>
                         \`).join('')}
                     </tbody>
@@ -2812,7 +2915,7 @@ function renderTravel() {
                                 <td><span class="badge \${statusBadge}">\${t.status}</span></td>
                                 <td>
                                     <button class="btn btn-secondary btn-sm" onclick="showToast('Rapor yükleme ekranı açılacak')">Rapor</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('travel', \${t.id})">Sil</button>
+                                    <button class="btn btn-warning btn-sm" onclick="editItem('travel', \${t.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('travel', \${t.id})">Sil</button>
                                 </td>
                             </tr>
                             \`;
@@ -2865,7 +2968,7 @@ function renderCustomers() {
                                 <td style="color:var(--text-muted);">${c.phone || '-'}</td>
                                 <td>
                                     <button class="btn btn-secondary btn-sm" onclick="alert('Detaylar gösterilecek')">İncele</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteItem('customer', ${c.id})">Sil</button>
+                                    <button class="btn btn-warning btn-sm" onclick="editItem('customer', ${c.id})" style="margin-right: 5px;">Düzenle</button><button class="btn btn-danger btn-sm" onclick="deleteItem('customer', ${c.id})">Sil</button>
                                 </td>
                             </tr>
                         `).join('')}
