@@ -535,20 +535,12 @@ function renderDashboard() {
         <div class="dashboard-canvas">
             
             <!-- ROW 0: THE EXTREME GAUGES GROUPED -->
-            <div class="d-card mb-2" style="padding: 24px;">
-                <div class="cockpit-gauges">
-                    <div class="gauge-widget">
-                        ${generateSVGGauge(45, 'NET KÂR MARJI', formatCurrency(netCashFlow), '#10B981')}
-                    </div>
-                    <div class="gauge-widget">
-                        ${generateSVGGauge(72, 'TAHSİLAT ORANI', formatCurrency(totalSales), '#6D4AFF')}
-                    </div>
-                    <div class="gauge-widget">
-                        ${generateSVGGauge(38, 'AÇIK ALACAK', formatCurrency(totalReceivables), '#3B82F6')}
-                    </div>
-                    <div class="gauge-widget">
-                        ${generateSVGGauge(15, 'RİSKLİ BORÇ', formatCurrency(totalPayables), '#FF5263')}
-                    </div>
+            <div class="dash-row mb-2">
+                <div class="d-card flex-1">
+                    ${generateSVGGauge(38, 'AÇIK ALACAK (BAKİYE)', formatCurrency(totalReceivables), '#3B82F6')}
+                </div>
+                <div class="d-card flex-1">
+                    ${generateSVGGauge(15, 'RİSKLİ BORÇ', formatCurrency(totalPayables), '#FF5263')}
                 </div>
             </div>
 
