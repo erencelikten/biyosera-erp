@@ -548,5 +548,6 @@ table tr:hover { background: rgba(255,255,255,0.015); }
     transform: translate(-50%, -50%) rotate(-90deg);
     z-index: -9999;
     opacity: 0.9; /* Increased dramatically for glassmorphism pop */
+    filter: blur(8px); /* Added blur to soften the background */
     pointer-events: none;
 }
